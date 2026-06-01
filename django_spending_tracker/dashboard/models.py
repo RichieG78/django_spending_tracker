@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
+from django.urls import reverse # Change here
 
 # Create your models here.
-
-class Post(models.Model):
+class Post(models.Model): 
     title = models.CharField(max_length=100)
     content = models.TextField()
     date_posted = models.DateTimeField(default=timezone.now)
@@ -12,3 +12,6 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_absolute_url(self): # Change here
+        return reverse('post-detail', kwargs={'pk': self.pk}) # Change here to bring the user to the post detail view
