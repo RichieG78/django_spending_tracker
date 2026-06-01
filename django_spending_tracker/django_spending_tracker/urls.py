@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings           #New import 1
+from django.conf.urls.static import static #New import 2
 from users import views as user_views
 from django.contrib.auth import views as auth_views
 
@@ -27,3 +29,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('profile/', user_views.profile, name='profile'),
 ]
+
+if settings.DEBUG: #New code block to serve media files during development
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
