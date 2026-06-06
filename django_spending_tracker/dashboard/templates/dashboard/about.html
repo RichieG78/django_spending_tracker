@@ -1,4 +1,47 @@
 {% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Intentional Spending Tracker{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'dashboard/main.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/about.css' %}">
+{% endblock %}
+
+{% block body_attrs %} class="about-page"{% endblock %}
+
 {% block content %}
-    <h1>Blog About!</h1>
-{% endblock content %}
+<div class="home-container">
+    <h1>Intentional Spending Tracker</h1>
+
+    <p class="description">
+        The Intentional Spending Tracker is a personal finance tool designed to help you align your spending with your values.
+        By following the popular <strong>50/30/20 Rule</strong>, you can ensure your needs are met, your future is secure, and you still have room to enjoy life today.
+    </p>
+
+    <div class="video-wrapper">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/K4kDVLycBgk?si=9iuGplS2wLzpnVsz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+    <div class="features">
+        <h3>The 50/30/20 Framework</h3>
+        <p>Divide your after-tax income into three buckets:</p>
+        <ul>
+            <li><strong>Fixed Costs (50%)</strong>: Needs. Rent/Mortgage, utilities, groceries, transportation, and insurance. These are bills you <em>must</em> pay.</li>
+            <li><strong>Fun Spending (30%)</strong>: Wants. Dining out, shopping, hobbies, Netflix, and travel. This is the money you enjoy!</li>
+            <li><strong>Future You (20%)</strong>: Savings and Debt. Emergency fund, retirement accounts (401k/IRA), and paying down high-interest debt.</li>
+        </ul>
+
+        <h3>How to Use This Tracker</h3>
+        <ol>
+            <li>Click the button below to visit the <strong>Dashboard</strong>.</li>
+            <li>Add your <strong>Income</strong> (use your net/take-home pay).</li>
+            <li>Log your <strong>Expenses</strong> as they happen.</li>
+            <li>Assign each expense to <strong>Fixed</strong>, <strong>Fun</strong>, or <strong>Future</strong>.</li>
+            <li>Watch the charts! If a bar turns red, you have exceeded your percentage for that bucket. Adjust your spending to get back on track.</li>
+        </ol>
+    </div>
+
+    <a href="{% url 'dashboard-home' %}" class="home-btn">Go to Dashboard</a>
+</div>
+{% endblock %}
