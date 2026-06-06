@@ -1,0 +1,15 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Delete Income{% endblock %}
+
+{% block content %}
+<div class="card content-section">
+    <h1>Delete Income</h1>
+    <p>Are you sure you want to delete <strong>{{ object.name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a class="btn btn-outline-secondary" href="{% url 'income-detail' object.pk %}">Cancel</a>
+    </form>
+</div>
+{% endblock %}

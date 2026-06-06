@@ -14,8 +14,14 @@
 
         {% for income in incomes %}
         <div class="income-row">
-            <span class="label">{{ income.name }}</span>
-            <span class="amount">EUR {{ income.amount }}</span>
+            <div class="income-details-wrapper">
+                <span class="label">{{ income.name }}</span>
+                <span class="amount">EUR {{ income.amount }}</span>
+            </div>
+            <div class="income-actions">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'income-update' income.pk %}">Edit</a>
+                <a class="btn btn-sm btn-outline-danger" href="{% url 'income-delete' income.pk %}">Delete</a>
+            </div>
         </div>
         {% empty %}
         <div class="income-row">
@@ -23,6 +29,19 @@
             <span class="amount">EUR 0.00</span>
         </div>
         {% endfor %}
+
+        <div class="income-row total-row">
+            <span class="label">Total Monthly Income</span>
+            <span class="amount">EUR {{ total_monthly_income }}</span>
+        </div>
+        <div class="income-row">
+            <span class="label">Total Expenses</span>
+            <span class="amount">EUR {{ total_expenses }}</span>
+        </div>
+        <div class="income-row">
+            <span class="label">Remaining</span>
+            <span class="amount">EUR {{ remaining_amount }}</span>
+        </div>
     </section>
 
     <section id="visualisation-container" class="card">

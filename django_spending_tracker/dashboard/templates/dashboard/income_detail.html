@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Income Details{% endblock %}
+
+{% block content %}
+<div class="card content-section">
+    <h1>{{ object.name }}</h1>
+    <div class="income-row"><span class="label">Amount</span><span class="amount">EUR {{ object.amount }}</span></div>
+    <div class="income-row"><span class="label">Type</span><span class="amount">{{ object.type }}</span></div>
+    <div class="income-row"><span class="label">Frequency</span><span class="amount">{{ object.frequency }}</span></div>
+    <div class="income-row"><span class="label">Gross/Net</span><span class="amount">{{ object.gross_net }}</span></div>
+    <div class="income-row"><span class="label">Created</span><span class="amount">{{ object.date }}</span></div>
+
+    <div class="form-actions" style="margin-top: 1rem;">
+        <a class="btn btn-primary" href="{% url 'income-update' object.pk %}">Edit Income</a>
+        <a class="btn btn-danger" href="{% url 'income-delete' object.pk %}">Delete Income</a>
+        <a class="btn btn-outline-secondary" href="{% url 'dashboard-home' %}">Back</a>
+    </div>
+</div>
+{% endblock %}

@@ -4,9 +4,10 @@ from decimal import Decimal, InvalidOperation
 from .models import Post, Income, Expense
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin #Added here to restrict access to certain views to logged in users only
 from django.views.generic import (
-    ListView, 
+    TemplateView,
     DetailView, 
     CreateView,
     UpdateView, #Added here, note if you have a long line of imports you can add ( ) to move each to a new line
@@ -20,102 +21,74 @@ from django.views.generic import (
 #     }
 #     return render(request, 'dashboard/home.html', context)
 
-class PostListView(ListView):
-    model = Post
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/home.html'  #<app>/<model>_<viewtype>.html
-    context_object_name = 'posts' #<dashboard>/<post>_<list>.html, Now the default name is set equal to 'posts'
-    ordering = ['-date_posted'] #Ordering the posts by date in descending order, - sign is used for descending order
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            context['incomes'] = Income.objects.filter(user=self.request.user).order_by('-date')
-            context['expenses'] = Expense.objects.filter(user=self.request.user).order_by('-date')
-        else:
-            context['incomes'] = Income.objects.none()
-            context['expenses'] = Expense.objects.none()
+        incomes = Income.objects.filter(user=self.request.user).order_by('-date')
+        expenses = Expense.objects.filter(user=self.request.user).order_by('-date')
+        total_monthly_income = sum((income.amount for income in incomes), Decimal('0.00'))
+        total_expenses = sum((expense.amount for expense in expenses), Decimal('0.00'))
+
+        context['incomes'] = incomes
+        context['expenses'] = expenses
+        context['total_monthly_income'] = total_monthly_income
+        context['total_expenses'] = total_expenses
+        context['remaining_amount'] = total_monthly_income - total_expenses
         return context
 
 
-class PostDetailView(DetailView):
-    model = Post  
+class IncomeDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Income
+    template_name = 'dashboard/income_detail.html'
 
-
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
-    fields = ['title', 'content']
-     
-    #Overriding form_valid method 
-    def form_valid(self, form):
-        form.instance.author = self.request.user # Set the author on the form
-        return super().form_valid(form) # Validate form by running form_valid method from parent class.
-    
-
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Post
-    fields = ['title', 'content']
-    
-    #Overriding form_valid method 
-    def form_valid(self, form):
-        form.instance.author = self.request.user # Set the author on the form
-        return super().form_valid(form) # Validate form by running form_valid method from parent class.
-    
-    #Added a new function here to check the user author is correct for the specific Post.
     def test_func(self):
-        post = self.get_object()
-        if self.request.user == post.author:
-            return True
-        return False
+        income = self.get_object()
+        return self.request.user == income.user
 
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # New class PostDeleteView created here
-    model = Post
-    success_url = '/' # After deleting a post, the user will be redirected to the home page.
-    
+
+class IncomeCreateView(LoginRequiredMixin, CreateView):
+    model = Income
+    template_name = 'dashboard/add_income.html'
+    fields = ['name', 'amount', 'frequency', 'type', 'gross_net']
+    success_url = reverse_lazy('dashboard-home')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.currency = 'EUR'
+        messages.success(self.request, 'Income added successfully.')
+        return super().form_valid(form)
+
+
+class IncomeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Income
+    template_name = 'dashboard/income_form.html'
+    fields = ['name', 'type', 'currency', 'amount', 'frequency', 'gross_net']
+    success_url = reverse_lazy('dashboard-home')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
     def test_func(self):
-        post = self.get_object()
-        if self.request.user == post.author:
-            return True
-        return False
-    
-def about(request):
-    return render(request, 'dashboard/about.html', {'title': 'About'})
+        income = self.get_object()
+        return self.request.user == income.user
+
+
+class IncomeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Income
+    template_name = 'dashboard/income_confirm_delete.html'
+    success_url = reverse_lazy('dashboard-home')
+
+    def test_func(self):
+        income = self.get_object()
+        return self.request.user == income.user
 
 
 @login_required
 def add_income(request):
-    if request.method == 'POST':
-        amount_raw = request.POST.get('amount', '').strip()
-        frequency = request.POST.get('frequency', 'monthly').strip().lower() or 'monthly'
-        income_type = request.POST.get('income_type', 'primary').strip().lower() or 'primary'
-        other_description = request.POST.get('other_description', '').strip()
-        amount_type = request.POST.get('amount_type', 'net').strip().lower() or 'net'
-
-        try:
-            amount = Decimal(amount_raw)
-            if amount <= 0:
-                raise InvalidOperation
-        except (InvalidOperation, ValueError):
-            return render(request, 'dashboard/add_income.html', {
-                'error_message': 'Please enter a valid amount greater than zero.'
-            })
-
-        name = 'Primary Income'
-        if income_type == 'other':
-            name = other_description or 'Other Income'
-
-        Income.objects.create(
-            user=request.user,
-            name=name,
-            type=income_type,
-            currency='EUR',
-            amount=amount,
-            frequency=frequency,
-            gross_net=amount_type,
-        )
-        messages.success(request, 'Income added successfully.')
-        return redirect('dashboard-home')
-
-    return render(request, 'dashboard/add_income.html')
+    return redirect('add_income')
 
 
 @login_required
