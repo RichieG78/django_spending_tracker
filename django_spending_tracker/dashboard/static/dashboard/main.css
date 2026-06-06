@@ -374,6 +374,19 @@ button:hover {
   background: transparent;
   border: 1px solid #d6def6;
   color: var(--ink);
+  text-decoration: none;
+}
+
+.btn-add.icon-btn {
+  min-width: 38px;
+  min-height: 38px;
+  border: 1px solid rgba(75, 107, 255, 0.25);
+  background: linear-gradient(130deg, rgba(75, 107, 255, 0.12), rgba(53, 197, 255, 0.14));
+  color: var(--accent);
+}
+
+.btn-add.icon-btn:hover {
+  background: linear-gradient(130deg, rgba(75, 107, 255, 0.18), rgba(53, 197, 255, 0.22));
 }
 
 .btn-edit.icon-btn:hover,
@@ -387,6 +400,18 @@ button:hover {
   width: 13.5px;
   height: 13.5px;
   display: block;
+  pointer-events: none;
+}
+
+.icon-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 800;
   pointer-events: none;
 }
 

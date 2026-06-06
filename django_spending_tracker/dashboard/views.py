@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from decimal import Decimal, InvalidOperation
-from .models import Post, Income, Expense
+from .models import Income, Expense
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse_lazy
@@ -15,11 +15,6 @@ from django.views.generic import (
 )
 
 # Create your views here.
-# def home(request):
-#     context = {
-#        'posts': Post.objects.all()
-#     }
-#     return render(request, 'dashboard/home.html', context)
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/home.html'  #<app>/<model>_<viewtype>.html
@@ -86,6 +81,104 @@ class IncomeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == income.user
 
 
+class ExpenseCreateView(LoginRequiredMixin, CreateView):
+    model = Expense
+    template_name = 'dashboard/add_expense.html'
+    fields = ['name', 'amount', 'frequency', 'type']
+    success_url = reverse_lazy('dashboard-home')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.currency = 'EUR'
+        messages.success(self.request, 'Expense added successfully.')
+        return super().form_valid(form)
+
+
+class ExpenseTypedMixin:
+    expense_type = None
+
+    def get_expense_type(self):
+        return (self.expense_type or 'fixed').lower()
+
+    def get_expense_type_label(self):
+        return self.get_expense_type().capitalize()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        expense_type = self.get_expense_type()
+        context['expense_type'] = expense_type
+        context['expense_type_label'] = self.get_expense_type_label()
+        context['detail_url_name'] = f'expense-{expense_type}-detail'
+        context['update_url_name'] = f'expense-{expense_type}-update'
+        context['delete_url_name'] = f'expense-{expense_type}-delete'
+        return context
+
+
+class ExpenseTypeCreateView(LoginRequiredMixin, ExpenseTypedMixin, CreateView):
+    model = Expense
+    template_name = 'dashboard/add_expense.html'
+    fields = ['name', 'amount', 'frequency']
+    success_url = reverse_lazy('dashboard-home')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.currency = 'EUR'
+        form.instance.type = self.get_expense_type()
+        messages.success(self.request, f'{self.get_expense_type_label()} expense added successfully.')
+        return super().form_valid(form)
+
+
+class ExpenseDetailView(LoginRequiredMixin, UserPassesTestMixin, ExpenseTypedMixin, DetailView):
+    model = Expense
+    template_name = 'dashboard/expense_detail.html'
+
+    def test_func(self):
+        expense = self.get_object()
+        return self.request.user == expense.user and expense.type.lower() == self.get_expense_type()
+
+
+class ExpenseUpdateView(LoginRequiredMixin, UserPassesTestMixin, ExpenseTypedMixin, UpdateView):
+    model = Expense
+    template_name = 'dashboard/expense_form.html'
+    fields = ['name', 'currency', 'amount', 'frequency']
+    success_url = reverse_lazy('dashboard-home')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.type = self.get_expense_type()
+        return super().form_valid(form)
+
+    def test_func(self):
+        expense = self.get_object()
+        return self.request.user == expense.user and expense.type.lower() == self.get_expense_type()
+
+
+class ExpenseDeleteView(LoginRequiredMixin, UserPassesTestMixin, ExpenseTypedMixin, DeleteView):
+    model = Expense
+    template_name = 'dashboard/expense_confirm_delete.html'
+    success_url = reverse_lazy('dashboard-home')
+
+    def test_func(self):
+        expense = self.get_object()
+        return self.request.user == expense.user and expense.type.lower() == self.get_expense_type()
+
+
+class FixedExpenseCreateView(ExpenseTypeCreateView):
+    expense_type = 'fixed'
+
+
+class FunExpenseCreateView(ExpenseTypeCreateView):
+    expense_type = 'fun'
+
+
+class FutureExpenseCreateView(ExpenseTypeCreateView):
+    expense_type = 'future'
+
+
+def about(request):
+    return render(request, 'dashboard/about.html', {'title': 'About'})
+
+
 @login_required
 def add_income(request):
     return redirect('add_income')
@@ -93,40 +186,5 @@ def add_income(request):
 
 @login_required
 def add_expense(request):
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        amount_raw = request.POST.get('amount', '').strip()
-        frequency = request.POST.get('frequency', 'monthly').strip().lower() or 'monthly'
-        expense_type = request.POST.get('expense_type', 'fixed').strip().lower() or 'fixed'
-
-        if not name:
-            return render(request, 'dashboard/add_expense.html', {
-                'error_message': 'Please enter an expense name.'
-            })
-
-        try:
-            amount = Decimal(amount_raw)
-            if amount <= 0:
-                raise InvalidOperation
-        except (InvalidOperation, ValueError):
-            return render(request, 'dashboard/add_expense.html', {
-                'error_message': 'Please enter a valid amount greater than zero.'
-            })
-
-        allowed_types = {'fixed', 'fun', 'future'}
-        if expense_type not in allowed_types:
-            expense_type = 'fixed'
-
-        Expense.objects.create(
-            user=request.user,
-            name=name,
-            type=expense_type,
-            currency='EUR',
-            amount=amount,
-            frequency=frequency,
-        )
-        messages.success(request, 'Expense added successfully.')
-        return redirect('dashboard-home')
-
-    return render(request, 'dashboard/add_expense.html')
+    return redirect('add_expense')
 

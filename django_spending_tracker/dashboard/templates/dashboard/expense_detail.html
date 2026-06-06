@@ -1,6 +1,6 @@
 {% extends "dashboard/base.html" %}
 
-{% block title %}Income Details{% endblock %}
+{% block title %}{{ expense_type_label }} Expense Details{% endblock %}
 
 {% block content %}
 <div class="card content-section">
@@ -8,17 +8,17 @@
     <div class="income-row"><span class="label">Amount</span><span class="amount">EUR {{ object.amount }}</span></div>
     <div class="income-row"><span class="label">Type</span><span class="amount">{{ object.type }}</span></div>
     <div class="income-row"><span class="label">Frequency</span><span class="amount">{{ object.frequency }}</span></div>
-    <div class="income-row"><span class="label">Gross/Net</span><span class="amount">{{ object.gross_net }}</span></div>
+    <div class="income-row"><span class="label">Currency</span><span class="amount">{{ object.currency }}</span></div>
     <div class="income-row"><span class="label">Created</span><span class="amount">{{ object.date }}</span></div>
 
     <div class="form-actions" style="margin-top: 1rem;">
-        <a class="btn-edit-income icon-btn" href="{% url 'income-update' object.pk %}" aria-label="Edit income" title="Edit income">
+        <a class="btn-edit icon-btn" href="{% url update_url_name object.pk %}" aria-label="Edit expense" title="Edit expense">
             <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
-            <span class="sr-only">Edit income</span>
+            <span class="sr-only">Edit expense</span>
         </a>
-        <a class="btn-delete-income icon-btn" href="{% url 'income-delete' object.pk %}" aria-label="Delete income" title="Delete income">
+        <a class="btn-delete icon-btn" href="{% url delete_url_name object.pk %}" aria-label="Delete expense" title="Delete expense">
             <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
-            <span class="sr-only">Delete income</span>
+            <span class="sr-only">Delete expense</span>
         </a>
         <a class="btn btn-outline-secondary" href="{% url 'dashboard-home' %}">Back</a>
     </div>

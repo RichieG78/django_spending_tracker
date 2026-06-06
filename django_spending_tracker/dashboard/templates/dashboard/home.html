@@ -9,7 +9,10 @@
     <section id="income-summary" class="card">
         <div class="income-header">
             <h3>Income Summary</h3>
-            <a id="add-income-btn" class="btn btn-primary" href="{% url 'add_income' %}">Add Income</a>
+            <a id="add-income-btn" class="btn-add icon-btn" href="{% url 'add_income' %}" aria-label="Add income" title="Add income">
+                <span class="icon-plus" aria-hidden="true">+</span>
+                <span class="sr-only">Add income</span>
+            </a>
         </div>
 
         {% for income in incomes %}
@@ -19,8 +22,14 @@
                 <span class="amount">EUR {{ income.amount }}</span>
             </div>
             <div class="income-actions">
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'income-update' income.pk %}">Edit</a>
-                <a class="btn btn-sm btn-outline-danger" href="{% url 'income-delete' income.pk %}">Delete</a>
+                <a class="btn-edit-income icon-btn" href="{% url 'income-update' income.pk %}" aria-label="Edit income" title="Edit income">
+                    <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                    <span class="sr-only">Edit income</span>
+                </a>
+                <a class="btn-delete-income icon-btn" href="{% url 'income-delete' income.pk %}" aria-label="Delete income" title="Delete income">
+                    <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                    <span class="sr-only">Delete income</span>
+                </a>
             </div>
         </div>
         {% empty %}
@@ -95,13 +104,27 @@
         <div class="expense-category">
             <div class="category-header">
                 <h3>Fixed</h3>
+                <a id="add-expense-btn" class="btn-add icon-btn" href="{% url 'add_fixed_expense' %}" aria-label="Add fixed expense" title="Add fixed expense">
+                    <span class="icon-plus" aria-hidden="true">+</span>
+                    <span class="sr-only">Add fixed expense</span>
+                </a>
             </div>
             {% for expense in expenses %}
                 {% if expense.type == 'fixed' %}
                 <div class="transaction-card">
                     <div class="transaction-details">
-                        <h4 class="transaction-title">{{ expense.name }}</h4>
+                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-fixed-detail' expense.pk %}">{{ expense.name }}</a></h4>
                         <span class="transaction-amount">EUR {{ expense.amount }}</span>
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="btn-edit icon-btn" href="{% url 'expense-fixed-update' expense.pk %}" aria-label="Edit fixed expense" title="Edit fixed expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <span class="sr-only">Edit fixed expense</span>
+                        </a>
+                        <a class="btn-delete icon-btn" href="{% url 'expense-fixed-delete' expense.pk %}" aria-label="Delete fixed expense" title="Delete fixed expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <span class="sr-only">Delete fixed expense</span>
+                        </a>
                     </div>
                 </div>
                 {% endif %}
@@ -111,13 +134,27 @@
         <div class="expense-category">
             <div class="category-header">
                 <h3>Fun</h3>
+                <a id="add-expense-btn" class="btn-add icon-btn" href="{% url 'add_fun_expense' %}" aria-label="Add fun expense" title="Add fun expense">
+                    <span class="icon-plus" aria-hidden="true">+</span>
+                    <span class="sr-only">Add fun expense</span>
+                </a>
             </div>
             {% for expense in expenses %}
                 {% if expense.type == 'fun' %}
                 <div class="transaction-card">
                     <div class="transaction-details">
-                        <h4 class="transaction-title">{{ expense.name }}</h4>
+                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-fun-detail' expense.pk %}">{{ expense.name }}</a></h4>
                         <span class="transaction-amount">EUR {{ expense.amount }}</span>
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="btn-edit icon-btn" href="{% url 'expense-fun-update' expense.pk %}" aria-label="Edit fun expense" title="Edit fun expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <span class="sr-only">Edit fun expense</span>
+                        </a>
+                        <a class="btn-delete icon-btn" href="{% url 'expense-fun-delete' expense.pk %}" aria-label="Delete fun expense" title="Delete fun expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <span class="sr-only">Delete fun expense</span>
+                        </a>
                     </div>
                 </div>
                 {% endif %}
@@ -127,13 +164,27 @@
         <div class="expense-category">
             <div class="category-header">
                 <h3>Future</h3>
+                <a id="add-expense-btn" class="btn-add icon-btn" href="{% url 'add_future_expense' %}" aria-label="Add future expense" title="Add future expense">
+                    <span class="icon-plus" aria-hidden="true">+</span>
+                    <span class="sr-only">Add future expense</span>
+                </a>
             </div>
             {% for expense in expenses %}
                 {% if expense.type == 'future' %}
                 <div class="transaction-card">
                     <div class="transaction-details">
-                        <h4 class="transaction-title">{{ expense.name }}</h4>
+                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-future-detail' expense.pk %}">{{ expense.name }}</a></h4>
                         <span class="transaction-amount">EUR {{ expense.amount }}</span>
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="btn-edit icon-btn" href="{% url 'expense-future-update' expense.pk %}" aria-label="Edit future expense" title="Edit future expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <span class="sr-only">Edit future expense</span>
+                        </a>
+                        <a class="btn-delete icon-btn" href="{% url 'expense-future-delete' expense.pk %}" aria-label="Delete future expense" title="Delete future expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <span class="sr-only">Delete future expense</span>
+                        </a>
                     </div>
                 </div>
                 {% endif %}

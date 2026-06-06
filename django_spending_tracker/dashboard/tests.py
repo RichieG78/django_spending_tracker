@@ -1,108 +1,81 @@
-from django.test import TestCase, Client
+from decimal import Decimal
+
 from django.contrib.auth.models import User
+from django.test import TestCase
 from django.urls import reverse
-from . models import Post
 
-# Create your tests here.
+from .models import Expense, Income
 
-class PostTests(TestCase):
-    
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='testuser', password='12345')
-        cls.post = Post.objects.create(
-            author=cls.user, 
-            title='Test Post', 
-            content='This is a test post'
-        )
-        
-    def test_post_content(self):
-        post = Post.objects.get(id=1)
-        expected_author = f'{post.author}'
-        expected_title = f'{post.title}'
-        expected_content = f'{post.content}'
-        self.assertEqual(expected_author, 'testuser')
-        self.assertEqual(expected_title, 'Test Post')
-        self.assertEqual(expected_content, 'This is a test post')
 
-    def test_post_content(self):
-        post = Post.objects.get(id=1)
-        expected_author = f'{post.author}'
-        expected_title = f'{post.title}'
-        expected_content = f'{post.content}'
-        self.assertEqual(expected_author, 'testuser')
-        self.assertEqual(expected_title, 'Test Post')
-        self.assertEqual(expected_content, 'This is a test post')
-
-    def test_post_str_method(self):
-        post = Post.objects.get(id=1)
-        self.assertEqual(str(post), post.title)
-
-    def test_get_absolute_url(self):
-        post = Post.objects.get(id=1)
-        self.assertEqual(post.get_absolute_url(), reverse('post-detail', args=[post.id]))
-    
-class PostViewTests(TestCase):
-    
+class DashboardViewTests(TestCase):
     def setUp(self):
-        self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
-        self.post = Post.objects.create(
-            author=self.user, 
-            title='Test Post', 
-            content='This is a test post'
-        )
 
-    def test_post_list_view(self):
-        url = reverse('dashboard-home')
-        response = self.client.get(url)
+    def test_dashboard_requires_auth(self):
+        response = self.client.get(reverse('dashboard-home'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_dashboard_renders_for_authenticated_user(self):
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('dashboard-home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'This is a test post')
         self.assertTemplateUsed(response, 'dashboard/home.html')
-    
-    def test_post_detail_view(self):
-        url = reverse('post-detail', args=[self.post.id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.post.title)
-    
-    def test_create_post_view(self):
+
+
+class ExpenseTypedRouteTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.other_user = User.objects.create_user(username='otheruser', password='12345')
         self.client.login(username='testuser', password='12345')
-        response = self.client.get(reverse('post-create'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'dashboard/post_form.html')
 
-        response = self.client.post(reverse('post-create'), {
-            'title': 'New title',
-            'content': 'New text',
-        })
-        self.assertEqual(response.status_code, 302)  # Redirect after POST
-        self.assertTrue(Post.objects.filter(title='New title').exists())
-    
+    def test_add_fun_expense_creates_fun_type(self):
+        response = self.client.post(
+            reverse('add_fun_expense'),
+            {
+                'name': 'Cinema',
+                'amount': '25.00',
+                'frequency': 'monthly',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        expense = Expense.objects.get(name='Cinema')
+        self.assertEqual(expense.type, 'fun')
+        self.assertEqual(expense.user, self.user)
 
-    def test_update_post_view(self):
-        self.client.login(username='testuser', password='12345')
-        url = reverse('post-update', kwargs={'pk': self.post.pk})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'dashboard/post_form.html')
+    def test_fixed_route_rejects_fun_expense_object(self):
+        expense = Expense.objects.create(
+            name='Streaming',
+            amount=Decimal('12.00'),
+            frequency='monthly',
+            type='fun',
+            currency='EUR',
+            user=self.user,
+        )
+        response = self.client.get(reverse('expense-fixed-detail', kwargs={'pk': expense.pk}))
+        self.assertEqual(response.status_code, 403)
 
-        response = self.client.post(url, {
-            'title': 'Updated title',
-            'content': 'Updated text',
-        })
-        self.post.refresh_from_db()
-        self.assertEqual(response.status_code, 302)  # Redirect after POST
-        self.assertEqual(self.post.title, 'Updated title')
+    def test_fun_route_rejects_other_user_expense(self):
+        expense = Expense.objects.create(
+            name='Theme Park',
+            amount=Decimal('40.00'),
+            frequency='monthly',
+            type='fun',
+            currency='EUR',
+            user=self.other_user,
+        )
+        response = self.client.get(reverse('expense-fun-detail', kwargs={'pk': expense.pk}))
+        self.assertEqual(response.status_code, 403)
 
-    
-def test_delete_post_view(self):
-        self.client.login(username='testuser', password='12345')
-        url = reverse('post-delete', kwargs={'pk': self.post.pk})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'blog/post_confirm_delete.html')
 
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)  # Redirect after POST
-        self.assertFalse(Post.objects.filter(pk=self.post.pk).exists())
+class IncomeModelTests(TestCase):
+    def test_income_string_representation(self):
+        user = User.objects.create_user(username='incomeuser', password='12345')
+        income = Income.objects.create(
+            name='Salary',
+            type='employment',
+            amount='5000.00',
+            frequency='monthly',
+            gross_net='net',
+            user=user,
+        )
+        self.assertIn('Salary', str(income))

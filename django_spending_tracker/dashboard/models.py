@@ -1,32 +1,26 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.urls import reverse # Change here
-
+ 
 # Create your models here.
-class Post(models.Model):
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-    date_posted = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
-
-    def get_absolute_url(self): # Change here
-        return reverse('post-detail', kwargs={'pk': self.pk}) # Change here to bring the user to the post detail view
 
 
     
 class Expense(models.Model):
     """Tracks every outgoing payment with the amount, type, and owner."""
 
+    EXPENSE_TYPE_CHOICES = [
+        ('fixed', 'Fixed'),
+        ('fun', 'Fun'),
+        ('future', 'Future'),
+    ]
+
     name = models.CharField(max_length=255)
     currency = models.CharField(max_length=3, default='EUR')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     frequency = models.CharField(max_length=20, default='monthly')
     date = models.DateTimeField(default=timezone.now)
-    type = models.CharField(max_length=20, default='fixed')
+    type = models.CharField(max_length=20, choices=EXPENSE_TYPE_CHOICES, default='fixed')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
 
     class Meta:
@@ -34,6 +28,11 @@ class Expense(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.amount} {self.currency})'
+
+    def save(self, *args, **kwargs):
+        # Normalize manual input (e.g. "Fixed") to canonical lowercase values.
+        self.type = (self.type or 'fixed').lower()
+        super().save(*args, **kwargs)
     
 class Income(models.Model):
     """Stores every money-in event so we can compare it with expenses."""
