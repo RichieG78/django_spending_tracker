@@ -1,0 +1,10 @@
+{
+  "python.testing.unittestEnabled": true,
+  "python.testing.pytestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}/django_spending_tracker",
+  "python.testing.unittestArgs": [
+    "-v",
+    "dashboard.tests"
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true
+}
