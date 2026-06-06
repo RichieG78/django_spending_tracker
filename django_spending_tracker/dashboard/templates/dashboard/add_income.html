@@ -1,0 +1,70 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Add Income - Financial Tracker{% endblock %}
+
+{% block body_attrs %} class="dashboard-page"{% endblock %}
+
+{% block content %}
+<div class="card content-section">
+    <h1>Add Income</h1>
+
+    {% if error_message %}
+    <p class="form-error">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" step="0.01" required placeholder="0.00" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="frequency">Frequency:</label>
+            <select id="frequency" name="frequency" required class="form-control">
+                <option value="hourly">Hourly</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly" selected>Monthly</option>
+                <option value="annually">Annually</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Income Type:</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" id="primary" name="income_type" value="primary" checked required>
+                    Primary Income
+                </label>
+            </div>
+            <div class="radio-group radio-group-spaced">
+                <label class="radio-label">
+                    <input type="radio" id="other" name="income_type" value="other">
+                    Other Income
+                </label>
+                <input type="text" name="other_description" class="form-control other-income-description" placeholder="Description (optional)">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Income Details:</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" id="gross" name="amount_type" value="gross" checked required>
+                    Gross Income
+                </label>
+                <label class="radio-label">
+                    <input type="radio" id="net" name="amount_type" value="net">
+                    Net Income
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-new">Add Income</button>
+            <a href="{% url 'dashboard-home' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

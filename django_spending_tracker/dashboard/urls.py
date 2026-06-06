@@ -11,6 +11,8 @@ from .import views
 
 urlpatterns = [
     path('', PostListView.as_view(), name='dashboard-home'), #Changed here
+    path('add-income/', views.add_income, name='add_income'),
+    path('add-expense/', views.add_expense, name='add_expense'),
     path('post/<int:pk>', PostDetailView.as_view(), name='post-detail'), #Changed here
     path('post/new/', PostCreateView.as_view(), name='post-create'), #url for creating a new post, changed here
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'), #url for updating a post, changed here

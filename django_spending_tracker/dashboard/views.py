@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Post
+from decimal import Decimal, InvalidOperation
+from .models import Post, Income, Expense
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin #Added here to restrict access to certain views to logged in users only
 from django.views.generic import (
     ListView, 
@@ -22,6 +25,16 @@ class PostListView(ListView):
     template_name = 'dashboard/home.html'  #<app>/<model>_<viewtype>.html
     context_object_name = 'posts' #<dashboard>/<post>_<list>.html, Now the default name is set equal to 'posts'
     ordering = ['-date_posted'] #Ordering the posts by date in descending order, - sign is used for descending order
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            context['incomes'] = Income.objects.filter(user=self.request.user).order_by('-date')
+            context['expenses'] = Expense.objects.filter(user=self.request.user).order_by('-date')
+        else:
+            context['incomes'] = Income.objects.none()
+            context['expenses'] = Expense.objects.none()
+        return context
 
 
 class PostDetailView(DetailView):
@@ -66,4 +79,81 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # New
     
 def about(request):
     return render(request, 'dashboard/about.html', {'title': 'About'})
+
+
+@login_required
+def add_income(request):
+    if request.method == 'POST':
+        amount_raw = request.POST.get('amount', '').strip()
+        frequency = request.POST.get('frequency', 'monthly').strip().lower() or 'monthly'
+        income_type = request.POST.get('income_type', 'primary').strip().lower() or 'primary'
+        other_description = request.POST.get('other_description', '').strip()
+        amount_type = request.POST.get('amount_type', 'net').strip().lower() or 'net'
+
+        try:
+            amount = Decimal(amount_raw)
+            if amount <= 0:
+                raise InvalidOperation
+        except (InvalidOperation, ValueError):
+            return render(request, 'dashboard/add_income.html', {
+                'error_message': 'Please enter a valid amount greater than zero.'
+            })
+
+        name = 'Primary Income'
+        if income_type == 'other':
+            name = other_description or 'Other Income'
+
+        Income.objects.create(
+            user=request.user,
+            name=name,
+            type=income_type,
+            currency='EUR',
+            amount=amount,
+            frequency=frequency,
+            gross_net=amount_type,
+        )
+        messages.success(request, 'Income added successfully.')
+        return redirect('dashboard-home')
+
+    return render(request, 'dashboard/add_income.html')
+
+
+@login_required
+def add_expense(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        amount_raw = request.POST.get('amount', '').strip()
+        frequency = request.POST.get('frequency', 'monthly').strip().lower() or 'monthly'
+        expense_type = request.POST.get('expense_type', 'fixed').strip().lower() or 'fixed'
+
+        if not name:
+            return render(request, 'dashboard/add_expense.html', {
+                'error_message': 'Please enter an expense name.'
+            })
+
+        try:
+            amount = Decimal(amount_raw)
+            if amount <= 0:
+                raise InvalidOperation
+        except (InvalidOperation, ValueError):
+            return render(request, 'dashboard/add_expense.html', {
+                'error_message': 'Please enter a valid amount greater than zero.'
+            })
+
+        allowed_types = {'fixed', 'fun', 'future'}
+        if expense_type not in allowed_types:
+            expense_type = 'fixed'
+
+        Expense.objects.create(
+            user=request.user,
+            name=name,
+            type=expense_type,
+            currency='EUR',
+            amount=amount,
+            frequency=frequency,
+        )
+        messages.success(request, 'Expense added successfully.')
+        return redirect('dashboard-home')
+
+    return render(request, 'dashboard/add_expense.html')
 

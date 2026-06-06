@@ -1,16 +1,125 @@
 {% extends "dashboard/base.html" %}
+
+{% block title %}Intentional Spending Tracker{% endblock %}
+
+{% block body_attrs %} class="dashboard-page"{% endblock %}
+
 {% block content %}
-    {% for post in posts %}
-        <article class="media content-section">
-            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}"> <!--Change here-->
-            <div class="media-body"> 
-              <div class="article-metadata">
-                <a class="mr-2" href="#">{{ post.author }}</a>
-                <small class="text-muted">{{ post.date_posted|date:'dS, F, Y' }}</small>
-              </div>
-              <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
-              <p class="article-content">{{ post.content }}</p>
+<div class="top-row">
+    <section id="income-summary" class="card">
+        <div class="income-header">
+            <h3>Income Summary</h3>
+            <a id="add-income-btn" class="btn btn-primary" href="{% url 'add_income' %}">Add Income</a>
+        </div>
+
+        {% for income in incomes %}
+        <div class="income-row">
+            <span class="label">{{ income.name }}</span>
+            <span class="amount">EUR {{ income.amount }}</span>
+        </div>
+        {% empty %}
+        <div class="income-row">
+            <span class="label">No income records yet.</span>
+            <span class="amount">EUR 0.00</span>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section id="visualisation-container" class="card">
+        <h2>Actual vs Target Expenditure</h2>
+        <div class="chart-container">
+            <div class="chart-item">
+                <div class="chart-header">
+                    <span>Fixed</span>
+                    <span class="target-text" style="left: 50%;">Target: 50%</span>
+                    <span class="current-percent">0%</span>
+                </div>
+                <div class="chart-track">
+                    <div class="chart-bar bar-fixed" style="width: 0%;"></div>
+                    <div class="target-line" style="left: 50%;"></div>
+                </div>
             </div>
-          </article>
-    {% endfor %}
-{% endblock content %}  
+
+            <div class="chart-item">
+                <div class="chart-header">
+                    <span>Fun</span>
+                    <span class="target-text" style="left: 30%;">Target: 30%</span>
+                    <span class="current-percent">0%</span>
+                </div>
+                <div class="chart-track">
+                    <div class="chart-bar bar-fun" style="width: 0%;"></div>
+                    <div class="target-line" style="left: 30%;"></div>
+                </div>
+            </div>
+
+            <div class="chart-item">
+                <div class="chart-header">
+                    <span>Future</span>
+                    <span class="target-text" style="left: 20%;">Target: 20%</span>
+                    <span class="current-percent">0%</span>
+                </div>
+                <div class="chart-track">
+                    <div class="chart-bar bar-future" style="width: 0%;"></div>
+                    <div class="target-line" style="left: 20%;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section id="expense-container">
+    <div class="expense-header">
+        <h2>Expense Tracker</h2>
+    </div>
+
+    <div class="expense-columns">
+        <div class="expense-category">
+            <div class="category-header">
+                <h3>Fixed</h3>
+            </div>
+            {% for expense in expenses %}
+                {% if expense.type == 'fixed' %}
+                <div class="transaction-card">
+                    <div class="transaction-details">
+                        <h4 class="transaction-title">{{ expense.name }}</h4>
+                        <span class="transaction-amount">EUR {{ expense.amount }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="expense-category">
+            <div class="category-header">
+                <h3>Fun</h3>
+            </div>
+            {% for expense in expenses %}
+                {% if expense.type == 'fun' %}
+                <div class="transaction-card">
+                    <div class="transaction-details">
+                        <h4 class="transaction-title">{{ expense.name }}</h4>
+                        <span class="transaction-amount">EUR {{ expense.amount }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="expense-category">
+            <div class="category-header">
+                <h3>Future</h3>
+            </div>
+            {% for expense in expenses %}
+                {% if expense.type == 'future' %}
+                <div class="transaction-card">
+                    <div class="transaction-details">
+                        <h4 class="transaction-title">{{ expense.name }}</h4>
+                        <span class="transaction-amount">EUR {{ expense.amount }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
