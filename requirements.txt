@@ -1,1 +1,8 @@
-django
+Django==4.2.30
+psycopg2-binary
+gunicorn
+whitenoise
+Pillow
+django-crispy-forms
+crispy-bootstrap5
+python-dotenv
