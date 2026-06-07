@@ -20,6 +20,12 @@
         {{ p_form.future_target_percent|as_crispy_field }}
     </div>
 
+    <!-- Currency card: preferred currency used for amount displays and defaults. -->
+    <div class="card content-section">
+        <h3 class="border-bottom pb-2 mb-3">Currency Preference</h3>
+        {{ p_form.preferred_currency|as_crispy_field }}
+    </div>
+
     <!-- One save button submits all preference sections together. -->
     <div class="form-group">
         <button class="btn btn-outline-info" type="submit">Save Preferences</button>

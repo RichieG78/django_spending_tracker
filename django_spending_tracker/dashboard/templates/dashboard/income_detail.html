@@ -3,9 +3,10 @@
 {% block title %}Income Details{% endblock %}
 
 {% block content %}
+<!-- Income detail card: shows the saved values for one income record. -->
 <div class="card content-section">
     <h1>{{ object.name }}</h1>
-    <div class="income-row"><span class="label">Amount</span><span class="amount">EUR {{ object.amount }}</span></div>
+    <div class="income-row"><span class="label">Amount</span><span class="amount">{{ request.user.profile.currency_symbol }} {{ object.amount }}</span></div>
     <div class="income-row"><span class="label">Type</span><span class="amount">{{ object.type }}</span></div>
     <div class="income-row"><span class="label">Frequency</span><span class="amount">{{ object.frequency }}</span></div>
     <div class="income-row"><span class="label">Gross/Net</span><span class="amount">{{ object.gross_net }}</span></div>

@@ -5,12 +5,73 @@
 {% block body_attrs %} class="dashboard-page"{% endblock %}
 
 {% block content %}
+<!-- Income creation card: captures one new income record for the current user. -->
 <div class="card content-section">
     <h1>Add Income</h1>
+    <p class="form-intro">Add an income source with a clear amount, recurrence schedule, and gross or net setting.</p>
 
-    <form method="post">
+    <form method="post" class="tracker-form">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-field-group">
+            <label class="form-label" for="{{ form.name.id_for_label }}">Income Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+            <div class="field-error">{{ form.name.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-field-group">
+            <label class="form-label" for="{{ form.amount.id_for_label }}">Amount</label>
+            {{ form.amount }}
+            {% if form.amount.errors %}
+            <div class="field-error">{{ form.amount.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-field-group">
+            <label class="form-label" for="{{ form.type.id_for_label }}">Income Type</label>
+            {{ form.type }}
+            {% if form.type.errors %}
+            <div class="field-error">{{ form.type.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <fieldset class="form-field-group frequency-group">
+            <legend class="form-label">Recurrence</legend>
+            <div class="radio-card-group">
+                {% for choice in form.frequency %}
+                <label class="radio-card">
+                    {{ choice.tag }}
+                    <span>{{ choice.choice_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.frequency.errors %}
+            <div class="field-error">{{ form.frequency.errors|striptags }}</div>
+            {% endif %}
+        </fieldset>
+
+        <fieldset class="form-field-group frequency-group">
+            <legend class="form-label">Gross or Net</legend>
+            <div class="radio-card-group radio-card-group-short">
+                {% for choice in form.gross_net %}
+                <label class="radio-card">
+                    {{ choice.tag }}
+                    <span>{{ choice.choice_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.gross_net.errors %}
+            <div class="field-error">{{ form.gross_net.errors|striptags }}</div>
+            {% endif %}
+        </fieldset>
 
         <div class="form-actions">
             <button type="submit" class="btn-new">Add Income</button>

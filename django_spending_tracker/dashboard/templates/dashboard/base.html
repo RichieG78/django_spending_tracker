@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Intentional Spending Tracker{% endblock %}</title>
+    <title>{% block title %}SpendWise{% endblock %}</title>
     {% block styles %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'dashboard/main.css' %}">
@@ -15,13 +15,15 @@
     <!-- Left navigation is only shown to logged-in users. -->
     {% if user.is_authenticated and show_sidebar|default:True %}
     <nav>
-        <h2>Intentional Spending Tracker</h2>
+        <h2>SpendWise</h2>
         <ul>
             <li><a href="{% url 'dashboard-home' %}" class="{% if active_page|default:'' == 'dashboard' %}active{% endif %}">Dashboard</a></li>
-            <li><a href="{% url 'dashboard-home' %}" class="{% if active_page|default:'' == 'performance' %}active{% endif %}">Performance</a></li>
-            <li><a href="{% url 'dashboard-about' %}" class="{% if active_page|default:'' == 'about' %}active{% endif %}">About</a></li>
+            <li><a href="{% url 'spending-tracker' %}" class="{% if active_page|default:'' == 'spending-tracker' %}active{% endif %}">Spending Tracker</a></li>
+            <li class="nav-divider" aria-hidden="true"></li>
             {% if user.is_authenticated %}
             <li><a href="{% url 'preferences' %}">Preferences</a></li>
+            <li><a href="{% url 'dashboard-about' %}" class="{% if active_page|default:'' == 'about' %}active{% endif %}">About</a></li>
+            <li class="nav-divider" aria-hidden="true"></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
             {% else %}
             <li><a href="{% url 'login' %}">Login</a></li>

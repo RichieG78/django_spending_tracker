@@ -5,16 +5,54 @@
 {% block body_attrs %} class="dashboard-page"{% endblock %}
 
 {% block content %}
+<!-- Expense creation card: captures one new expense in the selected category. -->
 <div class="card content-section">
     <h1>Add {{ expense_type_label }} Expense</h1>
+    <p class="form-intro">Capture a new {{ expense_type_label|lower }} expense with a clear amount and recurrence schedule.</p>
 
-    <form method="post">
+    <form method="post" class="tracker-form">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-field-group">
+            <label class="form-label" for="{{ form.name.id_for_label }}">Expense Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+            <div class="field-error">{{ form.name.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-field-group">
+            <label class="form-label" for="{{ form.amount.id_for_label }}">Amount</label>
+            {{ form.amount }}
+            {% if form.amount.errors %}
+            <div class="field-error">{{ form.amount.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <fieldset class="form-field-group frequency-group">
+            <legend class="form-label">Recurrence</legend>
+            <div class="radio-card-group">
+                {% for choice in form.frequency %}
+                <label class="radio-card">
+                    {{ choice.tag }}
+                    <span>{{ choice.choice_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.frequency.errors %}
+            <div class="field-error">{{ form.frequency.errors|striptags }}</div>
+            {% endif %}
+        </fieldset>
 
         <div class="form-actions">
             <button type="submit" class="btn-new">Add {{ expense_type_label }} Expense</button>
-            <a href="{% url 'dashboard-home' %}" class="btn btn-outline-secondary">Cancel</a>
+            <a href="{% url 'spending-tracker' %}" class="btn btn-outline-secondary">Cancel</a>
         </div>
     </form>
 </div>

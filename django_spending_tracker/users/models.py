@@ -11,6 +11,17 @@ from PIL import Image, UnidentifiedImageError
 class Profile(models.Model):
     """Extra user data stored separately from Django's built-in User model."""
 
+    CURRENCY_CHOICES = [
+        ('EUR', 'Euro (€)'),
+        ('USD', 'US Dollar ($)'),
+        ('GBP', 'British Pound (£)'),
+    ]
+    CURRENCY_SYMBOLS = {
+        'EUR': '€',
+        'USD': '$',
+        'GBP': '£',
+    }
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
     # Target percentages used by the dashboard's Actual vs Target chart.
@@ -32,6 +43,16 @@ class Profile(models.Model):
         default=20,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
+    preferred_currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default='EUR',
+    )
+
+    @property
+    def currency_symbol(self):
+        """Return the display symbol for the user's preferred currency."""
+        return self.CURRENCY_SYMBOLS.get(self.preferred_currency, '€')
 
     def __str__(self):
         return f'{self.user.username} Profile'

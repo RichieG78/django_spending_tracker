@@ -1,5 +1,7 @@
+"""Admin registrations for user profile data."""
+
 from django.contrib import admin
 from .models import Profile
 
-# Register your models here.
+# Show profile records in the admin alongside Django's built-in users.
 admin.site.register(Profile)

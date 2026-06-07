@@ -1,6 +1,11 @@
 {% extends "dashboard/base.html" %}
+{% load static %}
 
-{% block title %}Intentional Spending Tracker{% endblock %}
+{% block title %}SpendWise Dashboard{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block body_attrs %} class="dashboard-page"{% endblock %}
 
@@ -11,9 +16,8 @@
     <section id="income-summary" class="card">
         <div class="income-header">
             <h3>Income Summary</h3>
-            <a id="add-income-btn" class="btn-add icon-btn" href="{% url 'add_income' %}" aria-label="Add income" title="Add income">
-                <span class="icon-plus" aria-hidden="true">+</span>
-                <span class="sr-only">Add income</span>
+            <a id="add-income-btn" class="btn-add add-action-btn" href="{% url 'add_income' %}">
+                Add Income
             </a>
         </div>
 
@@ -21,7 +25,7 @@
         <div class="income-row income-item-row">
             <div class="income-details-wrapper">
                 <span class="label">{{ income.name }}</span>
-                <span class="amount">EUR {{ income.amount }}</span>
+                <span class="amount">{{ currency_symbol }} {{ income.amount }}</span>
             </div>
             <div class="income-actions">
                 <a class="btn-edit-income icon-btn" href="{% url 'income-update' income.pk %}" aria-label="Edit income" title="Edit income">
@@ -37,21 +41,21 @@
         {% empty %}
         <div class="income-row">
             <span class="label">No income records yet.</span>
-            <span class="amount">EUR 0.00</span>
+            <span class="amount">{{ currency_symbol }} 0.00</span>
         </div>
         {% endfor %}
 
         <div class="income-row total-row">
             <span class="label">Total Monthly Income</span>
-            <span class="amount">EUR {{ total_monthly_income }}</span>
+            <span class="amount">{{ currency_symbol }} {{ total_monthly_income }}</span>
         </div>
         <div class="income-row summary-expenses-row">
             <span class="label">Total Expenses</span>
-            <span class="amount amount-danger">EUR {{ total_expenses }}</span>
+            <span class="amount amount-danger">-{{ currency_symbol }} {{ total_expenses }}</span>
         </div>
         <div class="income-row summary-remaining-row">
             <span class="label">Remaining</span>
-            <span class="amount {% if remaining_amount < 0 %}amount-danger{% else %}amount-success{% endif %}">EUR {{ remaining_amount }}</span>
+            <span class="amount {% if remaining_amount < 0 %}amount-danger{% else %}amount-success{% endif %}">{{ currency_symbol }} {{ remaining_amount }}</span>
         </div>
     </section>
 
@@ -62,166 +66,114 @@
             <div class="chart-item">
                 <div class="chart-header">
                     <span>Fixed</span>
-                    <span class="target-text" data-left="{{ fixed_target_percent|floatformat:2 }}">Target: {{ fixed_target_percent }}%</span>
+                    <span class="target-text{% if fixed_over_target %} chart-over-target{% endif %}" data-left="{{ fixed_target_percent|floatformat:2 }}">Target: {{ fixed_target_percent }}%</span>
                     <span class="current-percent{% if fixed_over_target %} current-percent-over-target{% endif %}">{{ fixed_actual_percent }}%</span>
                 </div>
                 <div class="chart-track">
-                    <div class="chart-bar bar-fixed" data-width="{{ fixed_actual_bar_width|floatformat:2 }}"></div>
-                    <div class="target-line" data-left="{{ fixed_target_percent|floatformat:2 }}"></div>
+                    <div class="chart-bar bar-fixed{% if fixed_over_target %} chart-over-target{% endif %}" data-width="{{ fixed_actual_bar_width|floatformat:2 }}"></div>
+                    <div class="target-line{% if fixed_over_target %} chart-over-target{% endif %}" data-left="{{ fixed_target_percent|floatformat:2 }}"></div>
                 </div>
             </div>
 
             <div class="chart-item">
                 <div class="chart-header">
                     <span>Fun</span>
-                    <span class="target-text" data-left="{{ fun_target_percent|floatformat:2 }}">Target: {{ fun_target_percent }}%</span>
+                    <span class="target-text{% if fun_over_target %} chart-over-target{% endif %}" data-left="{{ fun_target_percent|floatformat:2 }}">Target: {{ fun_target_percent }}%</span>
                     <span class="current-percent{% if fun_over_target %} current-percent-over-target{% endif %}">{{ fun_actual_percent }}%</span>
                 </div>
                 <div class="chart-track">
-                    <div class="chart-bar bar-fun" data-width="{{ fun_actual_bar_width|floatformat:2 }}"></div>
-                    <div class="target-line" data-left="{{ fun_target_percent|floatformat:2 }}"></div>
+                    <div class="chart-bar bar-fun{% if fun_over_target %} chart-over-target{% endif %}" data-width="{{ fun_actual_bar_width|floatformat:2 }}"></div>
+                    <div class="target-line{% if fun_over_target %} chart-over-target{% endif %}" data-left="{{ fun_target_percent|floatformat:2 }}"></div>
                 </div>
             </div>
 
             <div class="chart-item">
                 <div class="chart-header">
                     <span>Future</span>
-                    <span class="target-text" data-left="{{ future_target_percent|floatformat:2 }}">Target: {{ future_target_percent }}%</span>
+                    <span class="target-text{% if future_over_target %} chart-over-target{% endif %}" data-left="{{ future_target_percent|floatformat:2 }}">Target: {{ future_target_percent }}%</span>
                     <span class="current-percent{% if future_over_target %} current-percent-over-target{% endif %}">{{ future_actual_percent }}%</span>
                 </div>
                 <div class="chart-track">
-                    <div class="chart-bar bar-future" data-width="{{ future_actual_bar_width|floatformat:2 }}"></div>
-                    <div class="target-line" data-left="{{ future_target_percent|floatformat:2 }}"></div>
+                    <div class="chart-bar bar-future{% if future_over_target %} chart-over-target{% endif %}" data-width="{{ future_actual_bar_width|floatformat:2 }}"></div>
+                    <div class="target-line{% if future_over_target %} chart-over-target{% endif %}" data-left="{{ future_target_percent|floatformat:2 }}"></div>
                 </div>
             </div>
         </div>
     </section>
 </div>
 
-<!-- Script applies dynamic chart widths from server-provided data attributes. -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.chart-bar[data-width]').forEach(function (bar) {
-        var width = parseFloat(bar.getAttribute('data-width') || '0');
-        if (!Number.isFinite(width)) {
-            width = 0;
-        }
-        width = Math.max(0, Math.min(100, width));
-        bar.style.width = width + '%';
-    });
+<section class="card annual-performance-card">
+    <h2>Annual Financial Performance</h2>
 
-    document.querySelectorAll('.target-text[data-left], .target-line[data-left]').forEach(function (el) {
-        var left = parseFloat(el.getAttribute('data-left') || '0');
-        if (!Number.isFinite(left)) {
-            left = 0;
-        }
-        left = Math.max(0, Math.min(100, left));
-        el.style.left = left + '%';
-    });
-});
-</script>
-
-<!-- Expense section: month navigation plus per-category expense cards. -->
-<section id="expense-container">
-    <div class="expense-header">
-        <h2>Expense Tracker</h2>
-        <div class="month-nav" aria-label="Month navigation">
-            <a class="month-nav-btn" href="{% url 'dashboard-home' %}?month={{ previous_month }}&year={{ previous_year }}" aria-label="Previous month">&lt;</a>
-            <span class="month-nav-label" title="{{ selected_month_name }} {{ selected_year }}">{{ selected_month_name }}</span>
-            <a class="month-nav-btn" href="{% url 'dashboard-home' %}?month={{ next_month }}&year={{ next_year }}" aria-label="Next month">&gt;</a>
+    <div class="performance-grid">
+        <div class="kpi-card">
+            <span class="kpi-title">Projected Annual Income</span>
+            <span class="kpi-value green">{{ currency_symbol }} {{ annual_income }}</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Total Recorded Spend</span>
+            <span class="kpi-value">{{ currency_symbol }} {{ annual_expense }}</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Net Position (Yearly)</span>
+            <span class="kpi-value {% if annual_net >= 0 %}green{% else %}red{% endif %}">
+                {{ currency_symbol }} {{ annual_net }}
+            </span>
         </div>
     </div>
 
-    <div class="expense-columns">
-        <div class="expense-category">
-            <div class="category-header">
-                <h3>Fixed</h3>
-                <a id="add-expense-btn" class="btn-add icon-btn" href="{% url 'add_fixed_expense' %}" aria-label="Add fixed expense" title="Add fixed expense">
-                    <span class="icon-plus" aria-hidden="true">+</span>
-                    <span class="sr-only">Add fixed expense</span>
-                </a>
+    <div class="performance-grid">
+        <div class="chart-wrapper chart-wrapper-wide">
+            <h3>Monthly Spending Trends</h3>
+            {{ month_labels|json_script:"monthly-chart-labels" }}
+            {{ month_totals|json_script:"monthly-chart-values" }}
+            <div class="monthly-chart-canvas-wrap">
+                <canvas id="monthlyChart" data-currency-symbol="{{ currency_symbol }}"></canvas>
             </div>
-            {% for expense in expenses %}
-                {% if expense.type == 'fixed' %}
-                <div class="transaction-card">
-                    <div class="transaction-details">
-                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-fixed-detail' expense.pk %}">{{ expense.name }}</a></h4>
-                        <span class="transaction-amount">EUR {{ expense.amount }}</span>
-                    </div>
-                    <div class="transaction-actions">
-                        <a class="btn-edit icon-btn" href="{% url 'expense-fixed-update' expense.pk %}" aria-label="Edit fixed expense" title="Edit fixed expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
-                            <span class="sr-only">Edit fixed expense</span>
-                        </a>
-                        <a class="btn-delete icon-btn" href="{% url 'expense-fixed-delete' expense.pk %}" aria-label="Delete fixed expense" title="Delete fixed expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
-                            <span class="sr-only">Delete fixed expense</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
         </div>
 
-        <div class="expense-category">
-            <div class="category-header">
-                <h3>Fun</h3>
-                <a id="add-expense-btn" class="btn-add icon-btn" href="{% url 'add_fun_expense' %}" aria-label="Add fun expense" title="Add fun expense">
-                    <span class="icon-plus" aria-hidden="true">+</span>
-                    <span class="sr-only">Add fun expense</span>
-                </a>
-            </div>
-            {% for expense in expenses %}
-                {% if expense.type == 'fun' %}
-                <div class="transaction-card">
-                    <div class="transaction-details">
-                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-fun-detail' expense.pk %}">{{ expense.name }}</a></h4>
-                        <span class="transaction-amount">EUR {{ expense.amount }}</span>
-                    </div>
-                    <div class="transaction-actions">
-                        <a class="btn-edit icon-btn" href="{% url 'expense-fun-update' expense.pk %}" aria-label="Edit fun expense" title="Edit fun expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
-                            <span class="sr-only">Edit fun expense</span>
-                        </a>
-                        <a class="btn-delete icon-btn" href="{% url 'expense-fun-delete' expense.pk %}" aria-label="Delete fun expense" title="Delete fun expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
-                            <span class="sr-only">Delete fun expense</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <div class="expense-category">
-            <div class="category-header">
-                <h3>Future</h3>
-                <a id="add-expense-btn" class="btn-add icon-btn" href="{% url 'add_future_expense' %}" aria-label="Add future expense" title="Add future expense">
-                    <span class="icon-plus" aria-hidden="true">+</span>
-                    <span class="sr-only">Add future expense</span>
-                </a>
-            </div>
-            {% for expense in expenses %}
-                {% if expense.type == 'future' %}
-                <div class="transaction-card">
-                    <div class="transaction-details">
-                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-future-detail' expense.pk %}">{{ expense.name }}</a></h4>
-                        <span class="transaction-amount">EUR {{ expense.amount }}</span>
-                    </div>
-                    <div class="transaction-actions">
-                        <a class="btn-edit icon-btn" href="{% url 'expense-future-update' expense.pk %}" aria-label="Edit future expense" title="Edit future expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
-                            <span class="sr-only">Edit future expense</span>
-                        </a>
-                        <a class="btn-delete icon-btn" href="{% url 'expense-future-delete' expense.pk %}" aria-label="Delete future expense" title="Delete future expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
-                            <span class="sr-only">Delete future expense</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
+        <div class="chart-wrapper chart-wrapper-narrow">
+            <h3>Biggest Single Expenses</h3>
+            <table class="top-expenses">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if top_expenses %}
+                        {% for expense in top_expenses %}
+                        <tr>
+                            <td>{{ expense.name }}</td>
+                            <td>{{ expense.date|date:"Y-m-d" }}</td>
+                            <td><strong>{{ currency_symbol }} {{ expense.amount }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="3">No expenses recorded yet.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 </section>
+
+<section class="card recommendations-card">
+    <h2>Smart Recommendations</h2>
+    <p class="recommendations-intro">Based on your yearly spending pattern, these quick wins can help you stay more intentional month to month.</p>
+    {% for rec in recommendations %}
+    <div class="recommendation-card {{ rec.type }}">
+        <span class="rec-title">{{ rec.title }}</span>
+        <span class="rec-text">{{ rec.text }}</span>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'dashboard/chart_layout.js' %}"></script>
+<script src="{% static 'dashboard/dashboard_home.js' %}"></script>
 {% endblock %}

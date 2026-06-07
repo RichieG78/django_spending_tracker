@@ -3,9 +3,10 @@
 {% block title %}{{ expense_type_label }} Expense Details{% endblock %}
 
 {% block content %}
+<!-- Expense detail card: shows one stored expense and its category metadata. -->
 <div class="card content-section">
     <h1>{{ object.name }}</h1>
-    <div class="income-row"><span class="label">Amount</span><span class="amount">EUR {{ object.amount }}</span></div>
+    <div class="income-row"><span class="label">Amount</span><span class="amount amount-success">{{ request.user.profile.currency_symbol }} {{ object.amount }}</span></div>
     <div class="income-row"><span class="label">Type</span><span class="amount">{{ object.type }}</span></div>
     <div class="income-row"><span class="label">Frequency</span><span class="amount">{{ object.frequency }}</span></div>
     <div class="income-row"><span class="label">Currency</span><span class="amount">{{ object.currency }}</span></div>
@@ -20,7 +21,7 @@
             <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
             <span class="sr-only">Delete expense</span>
         </a>
-        <a class="btn btn-outline-secondary" href="{% url 'dashboard-home' %}">Back</a>
+        <a class="btn btn-outline-secondary" href="{% url 'spending-tracker' %}">Back</a>
     </div>
 </div>
 {% endblock %}

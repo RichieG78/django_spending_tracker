@@ -3,6 +3,7 @@
 {% block title %}Update {{ expense_type_label }} Expense{% endblock %}
 
 {% block content %}
+<!-- Expense edit form: lets the user update one expense within its current type. -->
 <div class="card content-section">
     <h1>Update {{ expense_type_label }} Expense</h1>
     <form method="post">
@@ -10,7 +11,7 @@
         {{ form.as_p }}
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a class="btn btn-outline-secondary" href="{% url 'dashboard-home' %}">Cancel</a>
+            <a class="btn btn-outline-secondary" href="{% url 'spending-tracker' %}">Cancel</a>
         </div>
     </form>
 </div>

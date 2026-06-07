@@ -1,0 +1,200 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}SpendWise | Spending Tracker{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body_attrs %} class="dashboard-page"{% endblock %}
+
+{% block content %}
+<section class="card spending-overview-card">
+    <div class="spending-overview-layout">
+        <div class="spending-overview-details">
+            <div class="expense-header spending-overview-header">
+                <div>
+                    <h2>Spending Allocation Overview</h2>
+                    <p class="spending-overview-note">Bars compare each category's goal percentage of income against the actual percentage of income currently being spent.</p>
+                </div>
+                <div class="month-nav" aria-label="Month navigation">
+                    <a class="month-nav-btn" href="{% url 'spending-tracker' %}?month={{ previous_month }}&year={{ previous_year }}" aria-label="Previous month">&lt;</a>
+                    <span class="month-nav-label" title="{{ selected_month_name }} {{ selected_year }}">{{ selected_month_name }}</span>
+                    <a class="month-nav-btn" href="{% url 'spending-tracker' %}?month={{ next_month }}&year={{ next_year }}" aria-label="Next month">&gt;</a>
+                </div>
+            </div>
+
+            <div class="chart-container spending-chart-container">
+                <div class="chart-item spending-chart-item">
+                    <div class="chart-header spending-chart-header">
+                        <span>Fixed</span>
+                        <span class="target-text{% if fixed_over_target %} chart-over-target{% endif %}" data-left="{{ fixed_target_percent|floatformat:2 }}">Goal % of Income: {{ fixed_target_percent }}%</span>
+                        <span class="current-percent{% if fixed_over_target %} current-percent-over-target{% endif %}">Actual % of Income: {{ fixed_actual_percent }}%</span>
+                    </div>
+                    <div class="chart-track">
+                        <div class="chart-bar bar-fixed{% if fixed_over_target %} chart-over-target{% endif %}" data-width="{{ fixed_actual_bar_width|floatformat:2 }}"></div>
+                        <div class="target-line{% if fixed_over_target %} chart-over-target{% endif %}" data-left="{{ fixed_target_percent|floatformat:2 }}"></div>
+                    </div>
+                </div>
+
+                <div class="chart-item spending-chart-item">
+                    <div class="chart-header spending-chart-header">
+                        <span>Fun</span>
+                        <span class="target-text{% if fun_over_target %} chart-over-target{% endif %}" data-left="{{ fun_target_percent|floatformat:2 }}">Goal % of Income: {{ fun_target_percent }}%</span>
+                        <span class="current-percent{% if fun_over_target %} current-percent-over-target{% endif %}">Actual % of Income: {{ fun_actual_percent }}%</span>
+                    </div>
+                    <div class="chart-track">
+                        <div class="chart-bar bar-fun{% if fun_over_target %} chart-over-target{% endif %}" data-width="{{ fun_actual_bar_width|floatformat:2 }}"></div>
+                        <div class="target-line{% if fun_over_target %} chart-over-target{% endif %}" data-left="{{ fun_target_percent|floatformat:2 }}"></div>
+                    </div>
+                </div>
+
+                <div class="chart-item spending-chart-item">
+                    <div class="chart-header spending-chart-header">
+                        <span>Future</span>
+                        <span class="target-text{% if future_over_target %} chart-over-target{% endif %}" data-left="{{ future_target_percent|floatformat:2 }}">Goal % of Income: {{ future_target_percent }}%</span>
+                        <span class="current-percent{% if future_over_target %} current-percent-over-target{% endif %}">Actual % of Income: {{ future_actual_percent }}%</span>
+                    </div>
+                    <div class="chart-track">
+                        <div class="chart-bar bar-future{% if future_over_target %} chart-over-target{% endif %}" data-width="{{ future_actual_bar_width|floatformat:2 }}"></div>
+                        <div class="target-line{% if future_over_target %} chart-over-target{% endif %}" data-left="{{ future_target_percent|floatformat:2 }}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spending-overview-total-row">
+                <span>Total Monthly Income</span>
+                <strong>{{ currency_symbol }} {{ total_monthly_income }}</strong>
+            </div>
+
+            <div class="spending-overview-total-row">
+                <span>Total across all expense types</span>
+                <strong>{{ currency_symbol }} {{ total_expenses }}</strong>
+            </div>
+        </div>
+
+        <aside class="spending-overview-pie">
+            <h3>Share of Total Spend</h3>
+            <p class="spending-overview-note">This pie chart shows how your total spending is split across Fixed, Fun, and Future.</p>
+            {{ spend_breakdown_labels|json_script:"spend-breakdown-labels" }}
+            {{ spend_breakdown_values|json_script:"spend-breakdown-values" }}
+            <div class="spending-pie-canvas-wrap">
+                <canvas id="spendingBreakdownChart" data-currency-symbol="{{ currency_symbol }}"></canvas>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<!-- Expense section: month navigation plus per-category expense cards. -->
+<section id="expense-container">
+    <div class="expense-header">
+        <h2>Spending Tracker</h2>
+        <p class="spending-tracker-subtitle">Review and manage each expense entry by category for {{ selected_month_name }} {{ selected_year }}.</p>
+    </div>
+
+    <div class="expense-columns">
+        <div class="expense-category">
+            <div class="category-header">
+                <h3>Fixed</h3>
+                <a class="btn-add add-action-btn" href="{% url 'add_fixed_expense' %}">
+                    Add Expense
+                </a>
+            </div>
+            <div class="expense-category-summary">
+                <span class="{% if fixed_left_to_spend < 0 %}amount-danger{% else %}amount-success{% endif %}">Left to Allocate: {{ currency_symbol }} {{ fixed_left_to_spend }}</span>
+            </div>
+            {% for expense in expenses %}
+                {% if expense.type == 'fixed' %}
+                <div class="transaction-card">
+                    <div class="transaction-details">
+                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-fixed-detail' expense.pk %}">{{ expense.name }}</a></h4>
+                        <span class="transaction-amount">{{ currency_symbol }} {{ expense.amount }}</span>
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="btn-edit icon-btn" href="{% url 'expense-fixed-update' expense.pk %}" aria-label="Edit fixed expense" title="Edit fixed expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <span class="sr-only">Edit fixed expense</span>
+                        </a>
+                        <a class="btn-delete icon-btn" href="{% url 'expense-fixed-delete' expense.pk %}" aria-label="Delete fixed expense" title="Delete fixed expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <span class="sr-only">Delete fixed expense</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="expense-category">
+            <div class="category-header">
+                <h3>Fun</h3>
+                <a class="btn-add add-action-btn" href="{% url 'add_fun_expense' %}">
+                    Add Expense
+                </a>
+            </div>
+            <div class="expense-category-summary">
+                <span class="{% if fun_left_to_spend < 0 %}amount-danger{% else %}amount-success{% endif %}">Left to Allocate: {{ currency_symbol }} {{ fun_left_to_spend }}</span>
+            </div>
+            {% for expense in expenses %}
+                {% if expense.type == 'fun' %}
+                <div class="transaction-card">
+                    <div class="transaction-details">
+                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-fun-detail' expense.pk %}">{{ expense.name }}</a></h4>
+                        <span class="transaction-amount">{{ currency_symbol }} {{ expense.amount }}</span>
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="btn-edit icon-btn" href="{% url 'expense-fun-update' expense.pk %}" aria-label="Edit fun expense" title="Edit fun expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <span class="sr-only">Edit fun expense</span>
+                        </a>
+                        <a class="btn-delete icon-btn" href="{% url 'expense-fun-delete' expense.pk %}" aria-label="Delete fun expense" title="Delete fun expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <span class="sr-only">Delete fun expense</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="expense-category">
+            <div class="category-header">
+                <h3>Future</h3>
+                <a class="btn-add add-action-btn" href="{% url 'add_future_expense' %}">
+                    Add Expense
+                </a>
+            </div>
+            <div class="expense-category-summary">
+                <span class="{% if future_left_to_spend < 0 %}amount-danger{% else %}amount-success{% endif %}">Left to Allocate: {{ currency_symbol }} {{ future_left_to_spend }}</span>
+            </div>
+            {% for expense in expenses %}
+                {% if expense.type == 'future' %}
+                <div class="transaction-card">
+                    <div class="transaction-details">
+                        <h4 class="transaction-title"><a class="article-title" href="{% url 'expense-future-detail' expense.pk %}">{{ expense.name }}</a></h4>
+                        <span class="transaction-amount">{{ currency_symbol }} {{ expense.amount }}</span>
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="btn-edit icon-btn" href="{% url 'expense-future-update' expense.pk %}" aria-label="Edit future expense" title="Edit future expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <span class="sr-only">Edit future expense</span>
+                        </a>
+                        <a class="btn-delete icon-btn" href="{% url 'expense-future-delete' expense.pk %}" aria-label="Delete future expense" title="Delete future expense">
+                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <span class="sr-only">Delete future expense</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'dashboard/chart_layout.js' %}"></script>
+<script src="{% static 'dashboard/spending_tracker.js' %}"></script>
+{% endblock %}

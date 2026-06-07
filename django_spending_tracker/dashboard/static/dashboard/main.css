@@ -59,6 +59,20 @@ nav li + li {
   margin-top: 10px;
 }
 
+nav li.nav-divider + li {
+  margin-top: 10px;
+}
+
+.nav-divider {
+  height: 1px;
+  margin: 14px 6px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.nav-divider + li {
+  margin-top: 0;
+}
+
 nav a {
   display: block;
   padding: 11px 14px;
@@ -263,6 +277,12 @@ article.media.content-section {
   color: var(--danger);
 }
 
+.target-text.chart-over-target {
+  background-color: #fff1f2;
+  color: var(--danger);
+  border-color: #ffc8ce;
+}
+
 .chart-track {
   position: relative;
   height: 16px;
@@ -286,6 +306,10 @@ article.media.content-section {
   z-index: 2;
 }
 
+.target-line.chart-over-target {
+  background-color: var(--danger);
+}
+
 .bar-fixed {
   background: linear-gradient(90deg, #4b6bff, #7890ff);
 }
@@ -298,8 +322,113 @@ article.media.content-section {
   background: linear-gradient(90deg, #24b889, #62d9b3);
 }
 
+.chart-bar.chart-over-target {
+  background: linear-gradient(90deg, #f45e6a, #ff8a93);
+}
+
 #expense-container {
   padding: 24px;
+}
+
+.spending-overview-card {
+  padding: 24px;
+}
+
+.spending-overview-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 0.95fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.spending-overview-header {
+  margin-bottom: 18px;
+}
+
+.spending-overview-header h2 {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.35rem;
+}
+
+.spending-overview-note {
+  margin: 6px 0 0;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  max-width: 640px;
+}
+
+.spending-chart-container {
+  gap: 18px;
+}
+
+.spending-chart-item {
+  padding-bottom: 2px;
+}
+
+.spending-chart-header {
+  margin-bottom: 10px;
+}
+
+.allocation-meta-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.allocation-meta-row span:last-child {
+  text-align: right;
+}
+
+.spending-overview-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 1rem;
+}
+
+.spending-overview-total-row strong {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.08rem;
+}
+
+.spending-overview-pie {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  padding: 18px;
+}
+
+.spending-overview-pie h3 {
+  margin: 0 0 12px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.05rem;
+}
+
+.spending-pie-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+}
+
+#spendingBreakdownChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.spending-tracker-subtitle {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .expense-columns {
@@ -331,6 +460,20 @@ article.media.content-section {
   font-size: 1.05rem;
 }
 
+.expense-category-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #e2e9fb;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink-muted);
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
 .transaction-card {
   position: relative;
   padding: 12px;
@@ -359,7 +502,7 @@ article.media.content-section {
 }
 
 .transaction-amount {
-  color: var(--danger);
+  color: var(--success);
   font-weight: 700;
 }
 
@@ -444,6 +587,30 @@ button:hover {
   background: linear-gradient(130deg, rgba(75, 107, 255, 0.18), rgba(53, 197, 255, 0.22));
 }
 
+.add-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(75, 107, 255, 0.25);
+  border-radius: 12px;
+  background: linear-gradient(130deg, rgba(75, 107, 255, 0.12), rgba(53, 197, 255, 0.14));
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add-action-btn:hover {
+  background: linear-gradient(130deg, rgba(75, 107, 255, 0.18), rgba(53, 197, 255, 0.22));
+  color: var(--accent);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
 .btn-edit.icon-btn:hover,
 .btn-edit-income.icon-btn:hover,
 .btn-delete.icon-btn:hover,
@@ -468,6 +635,106 @@ button:hover {
   line-height: 1;
   font-weight: 800;
   pointer-events: none;
+}
+
+.tracker-form {
+  display: grid;
+  gap: 18px;
+}
+
+.form-intro {
+  margin: 6px 0 18px;
+  color: var(--ink-muted);
+}
+
+.form-field-group {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.form-label {
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d6def6;
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(75, 107, 255, 0.12);
+}
+
+.frequency-group {
+  border: 0;
+  padding: 0;
+}
+
+.radio-card-group {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.radio-card-group-short {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.radio-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  border: 1px solid #d6def6;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.radio-card:hover {
+  border-color: rgba(75, 107, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.radio-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-card:has(input:checked) {
+  border-color: rgba(75, 107, 255, 0.85);
+  background: linear-gradient(180deg, rgba(75, 107, 255, 0.12) 0%, rgba(53, 197, 255, 0.12) 100%);
+  box-shadow: 0 10px 24px rgba(75, 107, 255, 0.14);
+}
+
+.form-errors,
+.field-error {
+  color: var(--danger);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .sr-only {
@@ -503,6 +770,141 @@ button:hover {
 .income-amount {
   color: var(--ink);
   font-weight: 700;
+}
+
+.annual-performance-card h2,
+.recommendations-card h2 {
+  margin-top: 0;
+  margin-bottom: 14px;
+  font-family: 'Manrope', sans-serif;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.kpi-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kpi-title {
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.kpi-value {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.kpi-value.green {
+  color: var(--success);
+}
+
+.kpi-value.red {
+  color: var(--danger);
+}
+
+.chart-wrapper {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.chart-wrapper h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
+}
+
+.chart-wrapper-wide {
+  grid-column: span 2;
+}
+
+.chart-wrapper-narrow {
+  grid-column: span 1;
+}
+
+#monthlyChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.monthly-chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+.top-expenses {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.top-expenses th,
+.top-expenses td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid #edf1fb;
+}
+
+.top-expenses th {
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+
+.recommendations-intro {
+  margin-top: 0;
+  color: var(--ink-muted);
+}
+
+.recommendation-card {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recommendation-card.warning {
+  border: 1px solid #ffc6cc;
+  background: #fff3f4;
+}
+
+.recommendation-card.info {
+  border: 1px solid #cfe5ff;
+  background: #f3f9ff;
+}
+
+.recommendation-card.success {
+  border: 1px solid #caeddf;
+  background: #effbf5;
+}
+
+.rec-title {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rec-text {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
 }
 
 .edit-input-title,
@@ -568,6 +970,10 @@ a.article-title:hover {
 }
 
 @media (max-width: 1200px) {
+  .spending-overview-layout {
+    grid-template-columns: 1fr;
+  }
+
   .expense-columns {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
@@ -603,7 +1009,28 @@ a.article-title:hover {
     grid-template-columns: 1fr;
   }
 
+  .allocation-meta-row {
+    grid-template-columns: 1fr;
+  }
+
+  .allocation-meta-row span:last-child {
+    text-align: left;
+  }
+
+  .performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-wrapper-wide,
+  .chart-wrapper-narrow {
+    grid-column: span 1;
+  }
+
   .expense-columns {
     grid-template-columns: 1fr;
+  }
+
+  .radio-card-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

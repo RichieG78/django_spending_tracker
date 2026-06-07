@@ -1,3 +1,5 @@
+"""Behavior-focused tests for dashboard pages and finance models."""
+
 from decimal import Decimal
 from datetime import datetime
 
@@ -10,20 +12,40 @@ from .models import Expense, Income
 
 
 class DashboardViewTests(TestCase):
+    """Verify dashboard pages render the right data for the signed-in user."""
+
     def setUp(self):
+        """Create one reusable user for dashboard page tests."""
         self.user = User.objects.create_user(username='testuser', password='12345')
 
     def test_dashboard_requires_auth(self):
+        """Anonymous visitors should be redirected before seeing the dashboard."""
         response = self.client.get(reverse('dashboard-home'))
         self.assertEqual(response.status_code, 302)
 
     def test_dashboard_renders_for_authenticated_user(self):
+        """Signed-in users should get the main dashboard template."""
         self.client.login(username='testuser', password='12345')
         response = self.client.get(reverse('dashboard-home'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/home.html')
 
+    def test_spending_tracker_renders_for_authenticated_user(self):
+        """Signed-in users should also reach the dedicated spending tracker page."""
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('spending-tracker'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/spending_tracker.html')
+
+    def test_performance_route_redirects_to_spending_tracker(self):
+        """The legacy performance URL should forward users to the new tracker route."""
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get('/performance/')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers.get('Location'), reverse('spending-tracker'))
+
     def test_dashboard_percentage_context_values(self):
+        """Percentages should line up with the seeded monthly income and expenses."""
         Income.objects.create(
             name='Salary',
             type='employment',
@@ -68,6 +90,7 @@ class DashboardViewTests(TestCase):
         self.assertFalse(response.context['future_over_target'])
 
     def test_dashboard_over_target_flags(self):
+        """Over-target flags should switch on when spending passes each goal."""
         Income.objects.create(
             name='Salary',
             type='employment',
@@ -109,6 +132,7 @@ class DashboardViewTests(TestCase):
         self.assertTrue(response.context['future_over_target'])
 
     def test_dashboard_filters_by_selected_month(self):
+        """Month query parameters should filter dashboard totals to that month only."""
         june_date = timezone.make_aware(datetime(2026, 6, 15, 12, 0, 0))
         july_date = timezone.make_aware(datetime(2026, 7, 15, 12, 0, 0))
 
@@ -138,6 +162,7 @@ class DashboardViewTests(TestCase):
         self.assertEqual(response.context['selected_month_name'], 'June')
 
     def test_dashboard_month_navigation_rollover(self):
+        """Month navigation should wrap cleanly across the year boundary."""
         self.client.login(username='testuser', password='12345')
         response = self.client.get(reverse('dashboard-home'), {'month': 1, 'year': 2026})
 
@@ -148,12 +173,16 @@ class DashboardViewTests(TestCase):
 
 
 class ExpenseTypedRouteTests(TestCase):
+    """Confirm fixed/fun/future routes stay locked to their expected expense type."""
+
     def setUp(self):
+        """Create two users so ownership and type rules can both be tested."""
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.other_user = User.objects.create_user(username='otheruser', password='12345')
         self.client.login(username='testuser', password='12345')
 
     def test_add_fun_expense_creates_fun_type(self):
+        """Posting to the fun create route should save the record as a fun expense."""
         response = self.client.post(
             reverse('add_fun_expense'),
             {
@@ -168,6 +197,7 @@ class ExpenseTypedRouteTests(TestCase):
         self.assertEqual(expense.user, self.user)
 
     def test_fixed_route_rejects_fun_expense_object(self):
+        """A fun expense should not be viewable through the fixed-expense route."""
         expense = Expense.objects.create(
             name='Streaming',
             amount=Decimal('12.00'),
@@ -180,6 +210,7 @@ class ExpenseTypedRouteTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_fun_route_rejects_other_user_expense(self):
+        """Expense routes should block access to another user's records."""
         expense = Expense.objects.create(
             name='Theme Park',
             amount=Decimal('40.00'),
@@ -193,7 +224,10 @@ class ExpenseTypedRouteTests(TestCase):
 
 
 class IncomeModelTests(TestCase):
+    """Check small model-level behavior that supports dashboard displays."""
+
     def test_income_string_representation(self):
+        """Income string output should include the human-readable name."""
         user = User.objects.create_user(username='incomeuser', password='12345')
         income = Income.objects.create(
             name='Salary',

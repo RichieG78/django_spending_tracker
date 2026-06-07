@@ -1,7 +1,11 @@
+"""URL routes for dashboard, spending tracker, and finance CRUD views."""
+
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 from .views import (
     DashboardView,
+    SpendingTrackerView,
     ExpenseDetailView,
     ExpenseUpdateView,
     ExpenseDeleteView,
@@ -13,12 +17,18 @@ from .views import (
     IncomeUpdateView,
     IncomeDeleteView,
 )
-from .import views
+from . import views
 
 # Each path below maps a browser URL to one page/action in the dashboard app.
 urlpatterns = [
-    # Main dashboard with totals, charts, and lists.
-    path('', DashboardView.as_view(), name='dashboard-home'), #Changed here
+    # Main dashboard with income summary and target chart.
+    path('', DashboardView.as_view(), name='dashboard-home'),
+
+    # Dedicated page for all expense tracking functionality.
+    path('spending-tracker/', SpendingTrackerView.as_view(), name='spending-tracker'),
+
+    # Backward-compatible route for previous nav label/path.
+    path('performance/', RedirectView.as_view(pattern_name='spending-tracker', permanent=False)),
 
     # Income CRUD pages.
     path('add-income/', IncomeCreateView.as_view(), name='add_income'),

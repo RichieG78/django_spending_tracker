@@ -1,21 +1,24 @@
+"""Validation tests for user-facing account and profile forms."""
+
 from django.test import TestCase
 from django.contrib.auth.models import User
-#new for User Register, Profile and Update
 from django.core.files.uploadedfile import SimpleUploadedFile
-from . forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
-from . models import Profile
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
+from .models import Profile
 
-# Create your tests here.
 
 class UserFormTests(TestCase):
+    """Exercise the custom registration and profile forms with common inputs."""
 
     def setUp(self):
-        # Set up a user and profile for the tests
+        """Create one baseline user and profile for profile-update scenarios."""
         self.user = User.objects.create_user(username='testuser', password='12345')
-        Profile.objects.create(user=self.user, image='default.png')
+        # The post-save signal creates the related profile automatically.
+        self.user.profile.image = 'default.png'
+        self.user.profile.save()
 
     def test_user_register_form(self):
-        # Test user registration form with valid data
+        """Registration form should accept a valid new user payload."""
         form_data = {
             'username': 'newuser', 
             'email': 'newuser@example.com', 
@@ -26,7 +29,7 @@ class UserFormTests(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_user_update_form(self):
-    # Test user update form with valid data
+        """Updating username and email should be valid and persist to the user record."""
         form_data = {
             'username': 'updateduser', 
             'email': 'updateduser@example.com'
@@ -38,14 +41,14 @@ class UserFormTests(TestCase):
         self.assertEqual(self.user.username, 'updateduser')
 
     def test_profile_update_with_invalid_image_format(self):
-        # Test profile update with an invalid image format
+        """Profile form should reject uploads that are not real images."""
         invalid_image_data = b'this is not real image data'
         invalid_image_file = SimpleUploadedFile('new_image.txt', invalid_image_data, content_type='text/plain')
         form = ProfileUpdateForm(files={'image': invalid_image_file}, instance=self.user.profile)
         self.assertFalse(form.is_valid())
     
     def test_profile_update_with_oversized_image(self):
-        # Test profile update with an oversized image
+        """Profile form should reject very large uploads before saving them."""
         oversized_image_data = b'\x00' * 5242880  # 5MB of zeros
         oversized_image_file = SimpleUploadedFile('new_image.jpg', oversized_image_data, content_type='image/jpeg')
         form = ProfileUpdateForm(files={'image': oversized_image_file}, instance=self.user.profile)

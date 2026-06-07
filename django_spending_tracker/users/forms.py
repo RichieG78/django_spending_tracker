@@ -2,8 +2,9 @@
 
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm #Inheritance Relationship
+from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
+
 
 class UserRegisterForm(UserCreationForm):
     """Signup form that extends Django's default user creation form."""
@@ -14,8 +15,6 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-
-#UserUpdateForm inherits from forms.ModelForm
 class UserUpdateForm(forms.ModelForm):
     """Form for updating basic account fields shown in preferences."""
 
@@ -31,11 +30,18 @@ class ProfileUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Profile 
-        fields = ['image', 'fixed_target_percent', 'fun_target_percent', 'future_target_percent']
+        fields = [
+            'image',
+            'preferred_currency',
+            'fixed_target_percent',
+            'fun_target_percent',
+            'future_target_percent',
+        ]
 
     def clean(self):
         """Ensure the three target percentages always total 100%."""
         cleaned_data = super().clean()
+        # All three values must be present before we can verify the combined total.
         fixed = cleaned_data.get('fixed_target_percent')
         fun = cleaned_data.get('fun_target_percent')
         future = cleaned_data.get('future_target_percent')
