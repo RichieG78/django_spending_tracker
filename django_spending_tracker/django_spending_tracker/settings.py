@@ -143,3 +143,12 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True											#Transport Layer Security (like HTTP_S_]
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')			# app email address
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')	# app specific password
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no-reply@spendwise.local')
+
+# Real password-reset delivery requires EMAIL_HOST_USER and EMAIL_HOST_PASSWORD.
+# In development, fall back to the console backend so reset emails are still
+# generated and inspectable when SMTP credentials are missing.
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
