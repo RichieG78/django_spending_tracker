@@ -21,14 +21,24 @@ from django.conf.urls.static import static #New import 2
 from users import views as user_views
 from django.contrib.auth import views as auth_views
 
+# Project URL map: this connects top-level website paths to app pages.
 urlpatterns = [
+    # Django admin site.
     path('admin/', admin.site.urls),
+
+    # Main application routes from the dashboard app.
     path('', include("dashboard.urls")),
+
+    # Authentication and account routes.
     path('register/', user_views.register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html', extra_context={'show_sidebar': False}), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html', extra_context={'show_sidebar': False}), name='logout'),
+
+    # Preferences/profile routes for logged-in users.
+    path('preferences/', user_views.preferences, name='preferences'),
     path('profile/', user_views.profile, name='profile'),
 ]
 
+# In development, serve uploaded media (e.g. profile pictures) from MEDIA_URL.
 if settings.DEBUG: #New code block to serve media files during development
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

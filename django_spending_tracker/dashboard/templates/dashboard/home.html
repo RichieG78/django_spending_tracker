@@ -5,7 +5,9 @@
 {% block body_attrs %} class="dashboard-page"{% endblock %}
 
 {% block content %}
+<!-- Top row: income summary and chart visualisation cards. -->
 <div class="top-row">
+    <!-- Income summary: list of income entries plus totals. -->
     <section id="income-summary" class="card">
         <div class="income-header">
             <h3>Income Summary</h3>
@@ -16,7 +18,7 @@
         </div>
 
         {% for income in incomes %}
-        <div class="income-row">
+        <div class="income-row income-item-row">
             <div class="income-details-wrapper">
                 <span class="label">{{ income.name }}</span>
                 <span class="amount">EUR {{ income.amount }}</span>
@@ -43,61 +45,91 @@
             <span class="label">Total Monthly Income</span>
             <span class="amount">EUR {{ total_monthly_income }}</span>
         </div>
-        <div class="income-row">
+        <div class="income-row summary-expenses-row">
             <span class="label">Total Expenses</span>
-            <span class="amount">EUR {{ total_expenses }}</span>
+            <span class="amount amount-danger">EUR {{ total_expenses }}</span>
         </div>
-        <div class="income-row">
+        <div class="income-row summary-remaining-row">
             <span class="label">Remaining</span>
-            <span class="amount">EUR {{ remaining_amount }}</span>
+            <span class="amount {% if remaining_amount < 0 %}amount-danger{% else %}amount-success{% endif %}">EUR {{ remaining_amount }}</span>
         </div>
     </section>
 
+    <!-- Actual vs target chart: compares real spend percentages to user targets. -->
     <section id="visualisation-container" class="card">
         <h2>Actual vs Target Expenditure</h2>
         <div class="chart-container">
             <div class="chart-item">
                 <div class="chart-header">
                     <span>Fixed</span>
-                    <span class="target-text" style="left: 50%;">Target: 50%</span>
-                    <span class="current-percent">0%</span>
+                    <span class="target-text" data-left="{{ fixed_target_percent|floatformat:2 }}">Target: {{ fixed_target_percent }}%</span>
+                    <span class="current-percent{% if fixed_over_target %} current-percent-over-target{% endif %}">{{ fixed_actual_percent }}%</span>
                 </div>
                 <div class="chart-track">
-                    <div class="chart-bar bar-fixed" style="width: 0%;"></div>
-                    <div class="target-line" style="left: 50%;"></div>
+                    <div class="chart-bar bar-fixed" data-width="{{ fixed_actual_bar_width|floatformat:2 }}"></div>
+                    <div class="target-line" data-left="{{ fixed_target_percent|floatformat:2 }}"></div>
                 </div>
             </div>
 
             <div class="chart-item">
                 <div class="chart-header">
                     <span>Fun</span>
-                    <span class="target-text" style="left: 30%;">Target: 30%</span>
-                    <span class="current-percent">0%</span>
+                    <span class="target-text" data-left="{{ fun_target_percent|floatformat:2 }}">Target: {{ fun_target_percent }}%</span>
+                    <span class="current-percent{% if fun_over_target %} current-percent-over-target{% endif %}">{{ fun_actual_percent }}%</span>
                 </div>
                 <div class="chart-track">
-                    <div class="chart-bar bar-fun" style="width: 0%;"></div>
-                    <div class="target-line" style="left: 30%;"></div>
+                    <div class="chart-bar bar-fun" data-width="{{ fun_actual_bar_width|floatformat:2 }}"></div>
+                    <div class="target-line" data-left="{{ fun_target_percent|floatformat:2 }}"></div>
                 </div>
             </div>
 
             <div class="chart-item">
                 <div class="chart-header">
                     <span>Future</span>
-                    <span class="target-text" style="left: 20%;">Target: 20%</span>
-                    <span class="current-percent">0%</span>
+                    <span class="target-text" data-left="{{ future_target_percent|floatformat:2 }}">Target: {{ future_target_percent }}%</span>
+                    <span class="current-percent{% if future_over_target %} current-percent-over-target{% endif %}">{{ future_actual_percent }}%</span>
                 </div>
                 <div class="chart-track">
-                    <div class="chart-bar bar-future" style="width: 0%;"></div>
-                    <div class="target-line" style="left: 20%;"></div>
+                    <div class="chart-bar bar-future" data-width="{{ future_actual_bar_width|floatformat:2 }}"></div>
+                    <div class="target-line" data-left="{{ future_target_percent|floatformat:2 }}"></div>
                 </div>
             </div>
         </div>
     </section>
 </div>
 
+<!-- Script applies dynamic chart widths from server-provided data attributes. -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.chart-bar[data-width]').forEach(function (bar) {
+        var width = parseFloat(bar.getAttribute('data-width') || '0');
+        if (!Number.isFinite(width)) {
+            width = 0;
+        }
+        width = Math.max(0, Math.min(100, width));
+        bar.style.width = width + '%';
+    });
+
+    document.querySelectorAll('.target-text[data-left], .target-line[data-left]').forEach(function (el) {
+        var left = parseFloat(el.getAttribute('data-left') || '0');
+        if (!Number.isFinite(left)) {
+            left = 0;
+        }
+        left = Math.max(0, Math.min(100, left));
+        el.style.left = left + '%';
+    });
+});
+</script>
+
+<!-- Expense section: month navigation plus per-category expense cards. -->
 <section id="expense-container">
     <div class="expense-header">
         <h2>Expense Tracker</h2>
+        <div class="month-nav" aria-label="Month navigation">
+            <a class="month-nav-btn" href="{% url 'dashboard-home' %}?month={{ previous_month }}&year={{ previous_year }}" aria-label="Previous month">&lt;</a>
+            <span class="month-nav-label" title="{{ selected_month_name }} {{ selected_year }}">{{ selected_month_name }}</span>
+            <a class="month-nav-btn" href="{% url 'dashboard-home' %}?month={{ next_month }}&year={{ next_year }}" aria-label="Next month">&gt;</a>
+        </div>
     </div>
 
     <div class="expense-columns">

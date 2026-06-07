@@ -1,8 +1,10 @@
 from decimal import Decimal
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import Expense, Income
 
@@ -20,6 +22,129 @@ class DashboardViewTests(TestCase):
         response = self.client.get(reverse('dashboard-home'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/home.html')
+
+    def test_dashboard_percentage_context_values(self):
+        Income.objects.create(
+            name='Salary',
+            type='employment',
+            amount='1000.00',
+            frequency='monthly',
+            gross_net='net',
+            user=self.user,
+        )
+        Expense.objects.create(
+            name='Rent',
+            amount='500.00',
+            frequency='monthly',
+            type='fixed',
+            currency='EUR',
+            user=self.user,
+        )
+        Expense.objects.create(
+            name='Cinema',
+            amount='300.00',
+            frequency='monthly',
+            type='fun',
+            currency='EUR',
+            user=self.user,
+        )
+        Expense.objects.create(
+            name='Savings',
+            amount='200.00',
+            frequency='monthly',
+            type='future',
+            currency='EUR',
+            user=self.user,
+        )
+
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('dashboard-home'))
+
+        self.assertEqual(response.context['fixed_actual_percent'], Decimal('50.00'))
+        self.assertEqual(response.context['fun_actual_percent'], Decimal('30.00'))
+        self.assertEqual(response.context['future_actual_percent'], Decimal('20.00'))
+        self.assertFalse(response.context['fixed_over_target'])
+        self.assertFalse(response.context['fun_over_target'])
+        self.assertFalse(response.context['future_over_target'])
+
+    def test_dashboard_over_target_flags(self):
+        Income.objects.create(
+            name='Salary',
+            type='employment',
+            amount='1000.00',
+            frequency='monthly',
+            gross_net='net',
+            user=self.user,
+        )
+        Expense.objects.create(
+            name='Rent',
+            amount='600.00',
+            frequency='monthly',
+            type='fixed',
+            currency='EUR',
+            user=self.user,
+        )
+        Expense.objects.create(
+            name='Cinema',
+            amount='350.00',
+            frequency='monthly',
+            type='fun',
+            currency='EUR',
+            user=self.user,
+        )
+        Expense.objects.create(
+            name='Savings',
+            amount='250.00',
+            frequency='monthly',
+            type='future',
+            currency='EUR',
+            user=self.user,
+        )
+
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('dashboard-home'))
+
+        self.assertTrue(response.context['fixed_over_target'])
+        self.assertTrue(response.context['fun_over_target'])
+        self.assertTrue(response.context['future_over_target'])
+
+    def test_dashboard_filters_by_selected_month(self):
+        june_date = timezone.make_aware(datetime(2026, 6, 15, 12, 0, 0))
+        july_date = timezone.make_aware(datetime(2026, 7, 15, 12, 0, 0))
+
+        Income.objects.create(
+            name='June Salary',
+            type='employment',
+            amount='1000.00',
+            frequency='monthly',
+            gross_net='net',
+            user=self.user,
+            date=june_date,
+        )
+        Income.objects.create(
+            name='July Salary',
+            type='employment',
+            amount='2000.00',
+            frequency='monthly',
+            gross_net='net',
+            user=self.user,
+            date=july_date,
+        )
+
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('dashboard-home'), {'month': 6, 'year': 2026})
+
+        self.assertEqual(response.context['total_monthly_income'], Decimal('1000.00'))
+        self.assertEqual(response.context['selected_month_name'], 'June')
+
+    def test_dashboard_month_navigation_rollover(self):
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('dashboard-home'), {'month': 1, 'year': 2026})
+
+        self.assertEqual(response.context['previous_month'], 12)
+        self.assertEqual(response.context['previous_year'], 2025)
+        self.assertEqual(response.context['next_month'], 2)
+        self.assertEqual(response.context['next_year'], 2026)
 
 
 class ExpenseTypedRouteTests(TestCase):

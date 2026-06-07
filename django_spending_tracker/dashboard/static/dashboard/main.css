@@ -124,10 +124,44 @@ article.media.content-section {
   border-bottom: 1px solid var(--line);
 }
 
+.month-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #d6def6;
+  color: var(--ink);
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.month-nav-btn:hover {
+  background: #eef3ff;
+  color: var(--accent);
+}
+
+.month-nav-label {
+  min-width: 78px;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
+
 #income-summary h3,
 #visualisation-container h2,
 #expense-container h2 {
-  margin: 0;
+  margin: 10px 0;
   font-family: 'Manrope', sans-serif;
   letter-spacing: 0.01em;
   color: var(--ink);
@@ -158,6 +192,23 @@ article.media.content-section {
 
 .income-row .amount {
   font-weight: 700;
+}
+
+.income-item-row {
+  font-size: 0.8rem;
+}
+
+.income-item-row .label,
+.income-item-row .amount {
+  font-size: inherit;
+}
+
+.amount-danger {
+  color: var(--danger);
+}
+
+.amount-success {
+  color: var(--success);
 }
 
 .total-row {
@@ -206,6 +257,10 @@ article.media.content-section {
 .current-percent {
   color: var(--ink);
   font-weight: 700;
+}
+
+.current-percent-over-target {
+  color: var(--danger);
 }
 
 .chart-track {

@@ -12,7 +12,8 @@
     {% block head_extra %}{% endblock %}
 </head>
 <body{% block body_attrs %}{% endblock %}>
-    {% if show_sidebar|default:True %}
+    <!-- Left navigation is only shown to logged-in users. -->
+    {% if user.is_authenticated and show_sidebar|default:True %}
     <nav>
         <h2>Intentional Spending Tracker</h2>
         <ul>
@@ -20,7 +21,7 @@
             <li><a href="{% url 'dashboard-home' %}" class="{% if active_page|default:'' == 'performance' %}active{% endif %}">Performance</a></li>
             <li><a href="{% url 'dashboard-about' %}" class="{% if active_page|default:'' == 'about' %}active{% endif %}">About</a></li>
             {% if user.is_authenticated %}
-            <li><a href="{% url 'profile' %}">Profile</a></li>
+            <li><a href="{% url 'preferences' %}">Preferences</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
             {% else %}
             <li><a href="{% url 'login' %}">Login</a></li>
@@ -30,7 +31,9 @@
     </nav>
     {% endif %}
 
+    <!-- Main content area where each page injects its own content block. -->
     <main>
+        <!-- Flash messages show success/error updates after user actions. -->
         {% if messages %}
             {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">

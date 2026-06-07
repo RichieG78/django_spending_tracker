@@ -1,3 +1,5 @@
+"""Database models for income and expense records."""
+
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -10,6 +12,7 @@ class Expense(models.Model):
     """Tracks every outgoing payment with the amount, type, and owner."""
 
     EXPENSE_TYPE_CHOICES = [
+        # Fixed = needs, Fun = lifestyle spending, Future = savings/investing.
         ('fixed', 'Fixed'),
         ('fun', 'Fun'),
         ('future', 'Future'),

@@ -2,6 +2,7 @@
 {% load crispy_forms_tags %}                    
 
 {% block content %}
+    <!-- Login form for existing users. -->
    <div class="content-section">
     <form method="POST">  
         {% csrf_token %}
@@ -13,7 +14,7 @@
             <button class="btn btn-primary" type="submit">Login</button>
         </div>
         
-        {# <!-- ADDED 'small' block below --> #}
+        {# Password reset shortcut for users who cannot remember credentials. #}
         <small class="text-muted ml-2">
             <a href="{% url 'password_reset' %}">Forgot Password?</a>
         </small>
@@ -21,6 +22,7 @@
         
     </form>
     
+    <!-- Link to registration page for new users. -->
     <div class="border-top pt-3">
         <small class="text-muted">
             Need An Account? <a class="ml-2" href="{% url 'register' %}">Sign Up Now</a>

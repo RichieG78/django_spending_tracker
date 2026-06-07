@@ -1,6 +1,7 @@
 {% extends "dashboard/base.html" %}
 {% load crispy_forms_tags %} <!-- Updated here to load crispy forms -->
 {% block content %}
+    <!-- Registration form for creating a new account. -->
     <div class="content-section">
         <form method="POST">
             {% csrf_token %}
@@ -12,6 +13,7 @@
                 <button class="btn btn-outline-info" type="submit">Sign Up</button>
             </div>
         </form>
+        <!-- Shortcut for users who already have an account. -->
         <div class="border-top pt-3">
             <small class="text-muted">
                 Already Have An Account? <a class="ml-2" href="{% url 'login' %}">Sign In</a>

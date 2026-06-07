@@ -1,18 +1,28 @@
 {% extends "dashboard/base.html" %}
 {% load crispy_forms_tags %} <!-- Updated here to load crispy forms -->
 {% block content %}
-<div class="content-section">
-    <form method="POST" enctype="multipart/form-data"> <!-- Added an encoding type to save the image in the background -->
-        {% csrf_token %}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Profile Info</legend> <!-- Updated ledgend to display Profile Info -->
-            {{ u_form|crispy }} <!-- Updated to load the user form and let crispy take care of the formating -->
-            {{ p_form|crispy }} <!-- Updated to load the profile form and let crispy take care of the formating -->
-        </fieldset>
-        <div class="form-group">
-            <button class="btn btn-outline-info" type="submit">Update</button> <!-- Updated button to display Profile Info -->
-        </div>
-    </form>
-    <!-- FORM HERE -->
-</div>
+<form method="POST" enctype="multipart/form-data"> <!-- Added an encoding type to save the image in the background -->
+    {% csrf_token %}
+
+    <!-- Profile card: account identity fields and profile picture. -->
+    <div class="card content-section">
+        <h3 class="border-bottom pb-2 mb-3">Profile</h3>
+        {{ u_form.username|as_crispy_field }}
+        {{ u_form.email|as_crispy_field }}
+        {{ p_form.image|as_crispy_field }}
+    </div>
+
+    <!-- Target card: user-defined percentages for fixed/fun/future spending. -->
+    <div class="card content-section">
+        <h3 class="border-bottom pb-2 mb-3">Expenditure Targets</h3>
+        {{ p_form.fixed_target_percent|as_crispy_field }}
+        {{ p_form.fun_target_percent|as_crispy_field }}
+        {{ p_form.future_target_percent|as_crispy_field }}
+    </div>
+
+    <!-- One save button submits all preference sections together. -->
+    <div class="form-group">
+        <button class="btn btn-outline-info" type="submit">Save Preferences</button>
+    </div>
+</form>
 {% endblock content %}
