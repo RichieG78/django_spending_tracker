@@ -23,7 +23,7 @@ class Profile(models.Model):
     }
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
+    image = models.ImageField(upload_to='profile_pics', blank=True, null=True)
     # Target percentages used by the dashboard's Actual vs Target chart.
     fixed_target_percent = models.DecimalField(
         max_digits=5,
@@ -59,7 +59,7 @@ class Profile(models.Model):
 
     def save(self, *args, **kwargs):
         """Save profile first, then safely resize uploaded profile images."""
-        if self.image.name in {'default.jpg', 'media/profile_pics/default.jpg'}:
+        if not self.image:
             self.image.name = 'profile_pics/default.jpg'
 
         super().save(*args, **kwargs)
