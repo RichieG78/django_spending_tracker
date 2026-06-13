@@ -9,19 +9,25 @@ This is the second iteration of this project. The first version was built in Fla
 
 ## Live Application
 
-- **Render URL:** https://spendwise.onrender.com
+- **Render URL:** https://django-spending-tracker.onrender.com
 - **Repository:** https://github.com/RichieG78/django_spending_tracker.git
+- **Render deployment walkthrough video:** https://www.loom.com/share/f0bf740933c24687a8c61532d0565fc7
 
 **Examiner test login:**
 - Username: `richietester`
-- Password: `demo1234`
+- Password: `test1111`
+Use this for both the local sqlite and external logins.
 
 **Django Admin access:**
 - URL: `/admin/`
-- Username: `admin`
-- Password: `admin1234`
+- Username: `richietester`
+- Password: `1111test`
 
-> **Examiner note:** Please visit `/about` first. This page explains the 50/30/20 budgeting method and provides step-by-step usage guidance. It also contains a reference video that shaped the app's design and philosophy.
+> **Examiner note:** Please visit `https://django-spending-tracker.onrender.com/about/` first. This page explains the 50/30/20 budgeting method and provides step-by-step usage guidance.
+>
+> **Inspiration basis:** The app's core framing was inspired by the referenced video on the about page: https://www.youtube.com/watch?v=K4kDVLycBgk, especially its emphasis on intentional budgeting, category-based spending discipline, and planning ahead.
+
+[1] YouTube (n.d.) *Video source for budgeting-method inspiration*. Available at: https://www.youtube.com/watch?v=K4kDVLycBgk (Accessed: 13 June 2026).
 
 ---
 
@@ -80,7 +86,7 @@ The Flask version was a functional proof of concept. SpendWise rebuilds it from 
 | **Month navigation** | Not present | Previous/next month navigation on dashboard and spending tracker |
 | **Pie chart** | Not present | Chart.js doughnut showing share of total spend across Fixed, Fun, Future |
 | **Left-to-allocate** | Not present | Per-category remaining budget shown on Spending Tracker |
-| **Testing** | 4 basic tests | 11 behaviour-focused tests across two test classes |
+| **Testing** | 4 basic tests | 18 behaviour-focused tests across dashboard and users test suites |
 | **Signals** | Not present | `post_save` signals to auto-create and auto-save Profile on User creation |
 | **Static files** | Served by Flask | Django staticfiles with `collectstatic` for production |
 | **Deployment** | gunicorn only | gunicorn + whitenoise for static files, environment variable configuration |
@@ -174,7 +180,7 @@ django_spending_tracker/
 │   ├── forms.py           # ExpenseCreateForm, IncomeCreateForm
 │   ├── urls.py            # All dashboard URL routes
 │   ├── admin.py           # Admin registrations
-│   ├── tests.py           # 11 behaviour-focused tests
+│   ├── tests.py           # 14 behaviour-focused tests
 │   ├── migrations/        # 4 tracked migrations
 │   ├── static/dashboard/
 │   │   ├── main.css           # Full design system with CSS variables
@@ -300,10 +306,11 @@ Evidence in this project:
 
 Tests are split across two files:
 
-**`dashboard/tests.py` — 9 tests across 3 test classes:**
+**`dashboard/tests.py` — 14 tests across 4 test classes:**
 - `DashboardViewTests`: auth redirect, template rendering, spending tracker rendering, legacy performance redirect, percentage context values, over-target flags, month filtering, and month navigation rollover across year boundary.
-- `ExpenseTypedRouteTests`: typed route creates correct expense type, fixed route rejects fun expense (403), and fun route rejects other user's expense (403).
+- `ExpenseTypedRouteTests`: typed route creates correct expense type, success flash message appears after create, fixed route rejects fun expense (403), and fun route rejects other user's expense (403).
 - `IncomeModelTests`: `__str__` output includes the income name.
+- `CreateMessageTests`: success flash message appears after income creation.
 
 **`users/tests.py` — 4 tests:**
 - Registration form accepts a valid new user payload.
@@ -314,11 +321,11 @@ Tests are split across two files:
 **Run tests locally:**
 
 ```bash
-cd django_spending_tracker
-python manage.py test
+cd spend_wise
+DATABASE_URL= DEBUG=True python manage.py test
 ```
 
-Expected result: 13 tests run, all passing.
+Expected result: 18 tests run, all passing.
 
 ---
 
@@ -327,7 +334,7 @@ Expected result: 13 tests run, all passing.
 1. Clone the repository:
 	```bash
 	git clone https://github.com/RichieG78/django_spending_tracker.git
-	cd django_spending_tracker
+	cd django_spending_tracker/spend_wise
 	```
 
 2. Create and activate a virtual environment:
@@ -341,7 +348,7 @@ Expected result: 13 tests run, all passing.
 	pip install -r requirements.txt
 	```
 
-4. Create a `.env` file in the `django_spending_tracker/` directory:
+4. Create a `.env` file in the `spend_wise/` directory:
 	```
 	SECRET_KEY=your-secret-key-here
 	DATABASE_URL=postgres://user:password@localhost:5432/spendwise
@@ -374,11 +381,11 @@ Expected result: 13 tests run, all passing.
 ### 1. Push code to GitHub
 
 Ensure the latest code is committed and pushed. Confirm the repository includes:
-- `manage.py`
-- `requirements.txt`
-- `dashboard/`
-- `users/`
-- `django_spending_tracker/settings.py`
+- `spend_wise/manage.py`
+- `spend_wise/requirements.txt`
+- `spend_wise/dashboard/`
+- `spend_wise/users/`
+- `spend_wise/django_spending_tracker/settings.py`
 
 ### 2. Create a PostgreSQL database on Render
 
@@ -393,7 +400,7 @@ Ensure the latest code is committed and pushed. Confirm the repository includes:
 2. Connect your GitHub repository.
 3. Configure:
 	- **Environment:** Python
-	- **Root Directory:** `django_spending_tracker`
+	- **Root Directory:** `spend_wise`
 	- **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
 	- **Start Command:** `gunicorn django_spending_tracker.wsgi`
 4. Choose your region, instance type, and branch.
@@ -463,6 +470,7 @@ Defined in `requirements.txt`:
 - `django-crispy-forms`
 - `crispy-bootstrap5`
 - `python-dotenv`
+- `dj-database-url`
 
 ---
 
@@ -480,7 +488,7 @@ This submission targets distinction across all five rubric criteria by:
 - implementing the full Django auth stack including password reset, ownership enforcement, and user profile management,
 - applying class-based views and mixins to eliminate repetition and demonstrate architectural understanding,
 - building a relational schema with signals, validators, and migrations that show ORM depth beyond basic model definition,
-- writing 13 behaviour-focused tests that verify auth, data isolation, percentage logic, month filtering, and form validation,
+- writing 18 behaviour-focused tests that verify auth, data isolation, percentage logic, month filtering, form validation, and user-facing success messages,
 - extending the Flask feature set with month navigation, a personalised preferences system, currency selection, custom targets, and a pie chart — features that show clear progression and genuine product thinking,
 - deploying a fully functional hosted application with proper static file handling, environment variable configuration, and a verified post-deployment smoke test.
 
