@@ -7,6 +7,13 @@ This is the second iteration of this project. The first version was built in Fla
 
 ---
 
+**Examiner test login:**
+- Username: `richietester`
+- Password: `test1111`
+Use this for both the local sqlite and external logins.
+
+---
+
 ## Live Application
 
 - **Render URL:** https://django-spending-tracker.onrender.com
