@@ -29,11 +29,11 @@
             </div>
             <div class="income-actions">
                 <a class="btn-edit-income icon-btn" href="{% url 'income-update' income.pk %}" aria-label="Edit income" title="Edit income">
-                    <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                    <img class="icon-svg" src="{% static 'dashboard/icons/edit.svg' %}" alt="">
                     <span class="sr-only">Edit income</span>
                 </a>
                 <a class="btn-delete-income icon-btn" href="{% url 'income-delete' income.pk %}" aria-label="Delete income" title="Delete income">
-                    <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                    <img class="icon-svg" src="{% static 'dashboard/icons/trash.svg' %}" alt="">
                     <span class="sr-only">Delete income</span>
                 </a>
             </div>

@@ -113,11 +113,11 @@
                     </div>
                     <div class="transaction-actions">
                         <a class="btn-edit icon-btn" href="{% url 'expense-fixed-update' expense.pk %}" aria-label="Edit fixed expense" title="Edit fixed expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <img class="icon-svg" src="{% static 'dashboard/icons/edit.svg' %}" alt="">
                             <span class="sr-only">Edit fixed expense</span>
                         </a>
                         <a class="btn-delete icon-btn" href="{% url 'expense-fixed-delete' expense.pk %}" aria-label="Delete fixed expense" title="Delete fixed expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <img class="icon-svg" src="{% static 'dashboard/icons/trash.svg' %}" alt="">
                             <span class="sr-only">Delete fixed expense</span>
                         </a>
                     </div>
@@ -145,11 +145,11 @@
                     </div>
                     <div class="transaction-actions">
                         <a class="btn-edit icon-btn" href="{% url 'expense-fun-update' expense.pk %}" aria-label="Edit fun expense" title="Edit fun expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <img class="icon-svg" src="{% static 'dashboard/icons/edit.svg' %}" alt="">
                             <span class="sr-only">Edit fun expense</span>
                         </a>
                         <a class="btn-delete icon-btn" href="{% url 'expense-fun-delete' expense.pk %}" aria-label="Delete fun expense" title="Delete fun expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <img class="icon-svg" src="{% static 'dashboard/icons/trash.svg' %}" alt="">
                             <span class="sr-only">Delete fun expense</span>
                         </a>
                     </div>
@@ -177,11 +177,11 @@
                     </div>
                     <div class="transaction-actions">
                         <a class="btn-edit icon-btn" href="{% url 'expense-future-update' expense.pk %}" aria-label="Edit future expense" title="Edit future expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+                            <img class="icon-svg" src="{% static 'dashboard/icons/edit.svg' %}" alt="">
                             <span class="sr-only">Edit future expense</span>
                         </a>
                         <a class="btn-delete icon-btn" href="{% url 'expense-future-delete' expense.pk %}" aria-label="Delete future expense" title="Delete future expense">
-                            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+                            <img class="icon-svg" src="{% static 'dashboard/icons/trash.svg' %}" alt="">
                             <span class="sr-only">Delete future expense</span>
                         </a>
                     </div>

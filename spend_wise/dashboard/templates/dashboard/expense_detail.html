@@ -1,4 +1,5 @@
 {% extends "dashboard/base.html" %}
+{% load static %}
 
 {% block title %}{{ expense_type_label }} Expense Details{% endblock %}
 
@@ -14,11 +15,11 @@
 
     <div class="form-actions" style="margin-top: 1rem;">
         <a class="btn-edit icon-btn" href="{% url update_url_name object.pk %}" aria-label="Edit expense" title="Edit expense">
-            <img class="icon-svg" src="{{ MEDIA_URL }}icons/edit.svg" alt="">
+            <img class="icon-svg" src="{% static 'dashboard/icons/edit.svg' %}" alt="">
             <span class="sr-only">Edit expense</span>
         </a>
         <a class="btn-delete icon-btn" href="{% url delete_url_name object.pk %}" aria-label="Delete expense" title="Delete expense">
-            <img class="icon-svg" src="{{ MEDIA_URL }}icons/trash.svg" alt="">
+            <img class="icon-svg" src="{% static 'dashboard/icons/trash.svg' %}" alt="">
             <span class="sr-only">Delete expense</span>
         </a>
         <a class="btn btn-outline-secondary" href="{% url 'spending-tracker' %}">Back</a>
