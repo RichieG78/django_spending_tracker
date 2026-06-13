@@ -13,16 +13,6 @@ This is the second iteration of this project. The first version was built in Fla
 - **Repository:** https://github.com/RichieG78/django_spending_tracker.git
 - **Render deployment walkthrough video:** https://www.loom.com/share/f0bf740933c24687a8c61532d0565fc7
 
-**Examiner test login:**
-- Username: `richietester`
-- Password: `test1111`
-Use this for both the local sqlite and external logins.
-
-**Django Admin access:**
-- URL: `/admin/`
-- Username: `richietester`
-- Password: `1111test`
-
 > **Examiner note:** Please visit `https://django-spending-tracker.onrender.com/about/` first. This page explains the 50/30/20 budgeting method and provides step-by-step usage guidance.
 >
 > **Inspiration basis:** The app's core framing was inspired by the referenced video on the about page: https://www.youtube.com/watch?v=K4kDVLycBgk, especially its emphasis on intentional budgeting, category-based spending discipline, and planning ahead.
