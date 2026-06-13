@@ -222,5 +222,6 @@ htmlcov/
 
 # Deployment/runtime generated files
 .venv/
-media/
+media/*
+!media/default.jpg
 staticfiles/
