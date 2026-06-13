@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,10 +27,12 @@ SECRET_KEY = 'django-insecure-2%9qatfw$yui!^bz@8=#$%1kc2*25dn!nxtc#svbj%@%*tho2=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'django-spending-tracker.onrender.com',
-    'spendwise.onrender.com',
-]
+RENDER_EXTERNAL_URL = os.getenv('RENDER_EXTERNAL_URL', '')
+render_external_hostname = urlparse(RENDER_EXTERNAL_URL).hostname if RENDER_EXTERNAL_URL else None
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+if render_external_hostname:
+    ALLOWED_HOSTS.append(render_external_hostname)
 
 
 # Application definition
