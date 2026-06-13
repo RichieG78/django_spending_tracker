@@ -14,6 +14,8 @@ from pathlib import Path
 import os
 from urllib.parse import urlparse
 import dj_database_url
+from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,18 +24,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2%9qatfw$yui!^bz@8=#$%1kc2*25dn!nxtc#svbj%@%*tho2='
+# load_dotenv(BASE_DIR / ".env")
+# only load_dotenv if local (.env file)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if os.path.exists(BASE_DIR / ".env"):
+    load_dotenv(BASE_DIR / ".env")
+
+def env_bool(name: str, default: bool = False) -> bool:
+    value = os.getenv(name, str(default)).strip().lower()
+    return value in {"1", "true", "t", "yes", "y", "on"}
+
+
+DEBUG = env_bool("DEBUG", False)
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-only-change-me")
+
+if not DEBUG and SECRET_KEY == "django-insecure-dev-only-change-me":
+    raise ImproperlyConfigured("Set SECRET_KEY in the environment for production.")
+
 
 RENDER_EXTERNAL_URL = os.getenv('RENDER_EXTERNAL_URL', '')
 render_external_hostname = urlparse(RENDER_EXTERNAL_URL).hostname if RENDER_EXTERNAL_URL else None
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '').split(',') if host.strip()]
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 if render_external_hostname:
     ALLOWED_HOSTS.append(render_external_hostname)
+
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
+if RENDER_EXTERNAL_URL and RENDER_EXTERNAL_URL not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(RENDER_EXTERNAL_URL)
 
 
 # Application definition
@@ -86,19 +106,35 @@ WSGI_APPLICATION = 'django_spending_tracker.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG and not DATABASE_URL:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    if not DATABASE_URL:
+        raise ImproperlyConfigured("Set DATABASE_URL in the environment for production.")
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
+    }
 
-DATABASES = {									#ADDED
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL')
-    )
-}
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 
 # Password validation
