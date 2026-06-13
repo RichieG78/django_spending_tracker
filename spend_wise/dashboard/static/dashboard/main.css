@@ -737,6 +737,17 @@ button:hover {
   flex-wrap: wrap;
 }
 
+.flash-messages {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.flash-message {
+  margin: 0;
+  border-radius: 10px;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

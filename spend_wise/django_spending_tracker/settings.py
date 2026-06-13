@@ -24,9 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# load_dotenv(BASE_DIR / ".env")
-# only load_dotenv if local (.env file)
-
+# In Render, env vars come from the platform; locally we load from .env.
 if os.path.exists(BASE_DIR / ".env"):
     load_dotenv(BASE_DIR / ".env")
 
@@ -38,6 +36,7 @@ def env_bool(name: str, default: bool = False) -> bool:
 DEBUG = env_bool("DEBUG", False)
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-only-change-me")
 
+# Fail fast in production so we never run with the fallback key.
 if not DEBUG and SECRET_KEY == "django-insecure-dev-only-change-me":
     raise ImproperlyConfigured("Set SECRET_KEY in the environment for production.")
 
@@ -108,6 +107,7 @@ WSGI_APPLICATION = 'django_spending_tracker.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
+# Local dev can run with SQLite when DEBUG is on and DATABASE_URL is omitted.
 if DEBUG and not DATABASE_URL:
     DATABASES = {
         "default": {
@@ -116,6 +116,7 @@ if DEBUG and not DATABASE_URL:
         }
     }
 else:
+    # Production must provide DATABASE_URL (typically Render Postgres).
     if not DATABASE_URL:
         raise ImproperlyConfigured("Set DATABASE_URL in the environment for production.")
     DATABASES = {
@@ -127,6 +128,7 @@ else:
     }
 
 if not DEBUG:
+    # HTTPS/cookie hardening for production deployments behind a proxy.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -173,7 +175,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Newer modern and Pythonic way
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use WhiteNoise's hashed manifest storage in production; plain storage locally
+# and in tests (no collectstatic run required).
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

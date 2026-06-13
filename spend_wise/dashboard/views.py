@@ -53,6 +53,7 @@ class MonthlyFinanceContextMixin:
         """Build all values needed by the dashboard and spending tracker pages."""
         context = super().get_context_data(**kwargs)
         selected_month, selected_year = self._get_selected_month_year()
+        # Pull one month of records for day-to-day dashboard widgets.
         incomes = Income.objects.filter(
             user=self.request.user,
             date__month=selected_month,
@@ -63,6 +64,7 @@ class MonthlyFinanceContextMixin:
             date__month=selected_month,
             date__year=selected_year,
         ).order_by('-date')
+        # Pull year-wide records for trend charts and annual recommendations.
         yearly_incomes = Income.objects.filter(
             user=self.request.user,
             date__year=selected_year,
@@ -130,6 +132,7 @@ class MonthlyFinanceContextMixin:
         context['selected_year'] = selected_year
         context['selected_month_name'] = calendar.month_name[selected_month]
 
+        # Previous/next controls keep month navigation continuous across years.
         previous_month = selected_month - 1 if selected_month > 1 else 12
         previous_year = selected_year if selected_month > 1 else selected_year - 1
         next_month = selected_month + 1 if selected_month < 12 else 1
@@ -153,6 +156,7 @@ class MonthlyFinanceContextMixin:
         context['spend_breakdown_labels'] = ['Fixed', 'Fun', 'Future']
         context['spend_breakdown_values'] = [float(amount.quantize(Decimal('0.01'))) for amount in spend_breakdown_values]
 
+        # Share-of-spend values are based on total expenses, not total income.
         if total_expenses > Decimal('0.00'):
             context['fixed_spend_share'] = self._calculate_percentage(fixed_expenses_total, total_expenses).quantize(Decimal('0.01'))
             context['fun_spend_share'] = self._calculate_percentage(fun_expenses_total, total_expenses).quantize(Decimal('0.01'))
@@ -177,6 +181,8 @@ class MonthlyFinanceContextMixin:
                     'text': 'Your yearly spending is above your yearly income. Reduce non-essential categories to rebalance.',
                 })
 
+            # Ratios benchmark each category against annual income to keep
+            # recommendation thresholds stable across different income levels.
             fixed_ratio = fixed_annual_total / annual_income
             fun_ratio = fun_annual_total / annual_income
             future_ratio = future_annual_total / annual_income

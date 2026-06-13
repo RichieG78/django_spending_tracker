@@ -3,7 +3,17 @@
 from django.contrib import admin
 from .models import Expense, Income
 
-# Expose both finance models in the Django admin for quick inspection.
-admin.site.register(Income)
-admin.site.register(Expense)
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'amount', 'currency', 'type', 'frequency', 'date', 'user')
+    list_filter = ('type', 'frequency')
+    search_fields = ('name', 'user__username')
+
+
+@admin.register(Income)
+class IncomeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'amount', 'currency', 'type', 'frequency', 'gross_net', 'date', 'user')
+    list_filter = ('type', 'frequency')
+    search_fields = ('name', 'user__username')
 

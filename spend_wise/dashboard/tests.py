@@ -3,6 +3,7 @@
 from decimal import Decimal
 from datetime import datetime
 
+from django.contrib.messages import get_messages
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -196,6 +197,21 @@ class ExpenseTypedRouteTests(TestCase):
         self.assertEqual(expense.type, 'fun')
         self.assertEqual(expense.user, self.user)
 
+    def test_add_fun_expense_shows_success_message(self):
+        """Creating a fun expense should queue a visible success flash message."""
+        response = self.client.post(
+            reverse('add_fun_expense'),
+            {
+                'name': 'Coffee',
+                'amount': '4.50',
+                'frequency': 'weekly',
+            },
+            follow=True,
+        )
+
+        messages = [message.message for message in get_messages(response.wsgi_request)]
+        self.assertIn('Fun expense added successfully.', messages)
+
     def test_fixed_route_rejects_fun_expense_object(self):
         """A fun expense should not be viewable through the fixed-expense route."""
         expense = Expense.objects.create(
@@ -238,3 +254,28 @@ class IncomeModelTests(TestCase):
             user=user,
         )
         self.assertIn('Salary', str(income))
+
+
+class CreateMessageTests(TestCase):
+    """Ensure create flows surface user feedback via Django messages."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='messageuser', password='12345')
+        self.client.login(username='messageuser', password='12345')
+
+    def test_add_income_shows_success_message(self):
+        """Creating an income should queue a success flash message."""
+        response = self.client.post(
+            reverse('add_income'),
+            {
+                'name': 'Salary',
+                'amount': '2000.00',
+                'frequency': 'monthly',
+                'type': 'employment',
+                'gross_net': 'net',
+            },
+            follow=True,
+        )
+
+        messages = [message.message for message in get_messages(response.wsgi_request)]
+        self.assertIn('Income added successfully.', messages)

@@ -37,11 +37,13 @@
     <main>
         <!-- Flash messages show success/error updates after user actions. -->
         {% if messages %}
+        <section class="flash-messages" aria-label="Page notifications">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} flash-message" role="status" aria-live="polite">
                 {{ message }}
             </div>
             {% endfor %}
+        </section>
         {% endif %}
 
         {% block content %}{% endblock %}
